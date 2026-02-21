@@ -165,6 +165,16 @@ export default function MathRushGame({
   const [showCorrectAnswer, setShowCorrectAnswer] = useState<number | null>(
     null,
   );
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Show tutorial on first visit
+  useEffect(() => {
+    const key = "neuroflex_mathrush_tutorial_seen";
+    if (!localStorage.getItem(key)) {
+      setShowTutorial(true);
+      localStorage.setItem(key, "1");
+    }
+  }, []);
 
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const feedbackTimeout = useRef<ReturnType<typeof setTimeout>>(undefined);
@@ -482,6 +492,26 @@ export default function MathRushGame({
           <span className="text-2xl font-bold tabular-nums text-white">
             {score}
           </span>
+          <button
+            type="button"
+            onClick={() => setShowTutorial(true)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-white/50 hover:bg-white/10"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -614,6 +644,76 @@ export default function MathRushGame({
           {Math.ceil(timeLeft)}s
         </span>
       </div>
+
+      {/* Tutorial Modal */}
+      <AnimatePresence>
+        {showTutorial && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+            onClick={() => setShowTutorial(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-2xl bg-slate-800 p-5 shadow-2xl"
+            >
+              <h2 className="mb-4 text-center text-lg font-bold text-white">
+                수학 러시 플레이 방법
+              </h2>
+
+              <div className="space-y-4 text-sm text-white/80">
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">목표</p>
+                  <p>제한 시간 안에 최대한 많은 수학 문제를 풀어보세요!</p>
+                </div>
+
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">
+                    플레이 방법
+                  </p>
+                  <ul className="list-disc pl-4 space-y-1 text-white/60">
+                    <li>수학 문제가 화면에 표시됩니다</li>
+                    <li>보기 중 올바른 답을 선택하세요</li>
+                    <li>빠르게 맞출수록 높은 점수!</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">
+                    레벨 시스템
+                  </p>
+                  <ul className="list-disc pl-4 space-y-1 text-white/60">
+                    <li>연속 정답 시 레벨이 올라갑니다</li>
+                    <li>레벨이 높을수록 어려운 문제가 나옵니다</li>
+                    <li>틀리면 레벨이 내려갑니다</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="mb-1 font-semibold text-indigo-300">팁</p>
+                  <ul className="list-disc pl-4 space-y-1 text-white/60">
+                    <li>콤보를 유지하면 보너스 점수!</li>
+                    <li>시간이 다 되면 게임 종료</li>
+                  </ul>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowTutorial(false)}
+                className="mt-5 w-full rounded-xl bg-indigo-500 py-3 text-sm font-bold text-white transition-colors hover:bg-indigo-400"
+              >
+                알겠어요!
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

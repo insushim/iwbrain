@@ -82,12 +82,22 @@ export default function PatternMemoryGame({
     null,
   );
   const [maxSequence, setMaxSequence] = useState(0);
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const announcementTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
+
+  // Show tutorial on first visit
+  useEffect(() => {
+    const key = "neuroflex_patternmemory_tutorial_seen";
+    if (!localStorage.getItem(key)) {
+      setShowTutorial(true);
+      localStorage.setItem(key, "1");
+    }
+  }, []);
 
   useEffect(() => {
     return () => {
@@ -341,7 +351,25 @@ export default function PatternMemoryGame({
             <div className="text-xs text-white/50">라운드 {round}</div>
           )}
         </div>
-        <div className="w-12" />
+        <button
+          onClick={() => setShowTutorial(true)}
+          className="w-8 h-8 flex items-center justify-center rounded-full text-white/50 hover:bg-white/10 transition-colors"
+        >
+          <svg
+            width="18"
+            height="18"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <circle cx="12" cy="12" r="10" />
+            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+            <line x1="12" y1="17" x2="12.01" y2="17" />
+          </svg>
+        </button>
       </div>
 
       {/* Lives & Score */}
@@ -592,6 +620,89 @@ export default function PatternMemoryGame({
           </div>
         </motion.div>
       )}
+      {/* Tutorial Modal */}
+      <AnimatePresence>
+        {showTutorial && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+            onClick={() => setShowTutorial(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-2xl bg-slate-800 p-5 shadow-2xl"
+            >
+              <h2 className="mb-4 text-center text-lg font-bold text-white">
+                패턴 기억 플레이 방법
+              </h2>
+
+              <div className="space-y-4 text-sm text-white/80">
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">목표</p>
+                  <p>화면에 표시되는 패턴을 기억하고 똑같이 재현하세요</p>
+                </div>
+
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">
+                    플레이 방법
+                  </p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li>격자에 패턴이 잠깐 표시됩니다</li>
+                    <li>패턴을 기억하세요!</li>
+                    <li>패턴이 사라지면 기억한 위치를 탭하세요</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">
+                    모드 변화
+                  </p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li>
+                      <span className="font-bold text-white">기본:</span> 패턴을
+                      그대로 재현
+                    </li>
+                    <li>
+                      <span className="font-bold text-white">역순:</span> 반대
+                      순서로 입력
+                    </li>
+                    <li>
+                      <span className="font-bold text-white">색상:</span>{" "}
+                      색깔까지 기억해야 합니다
+                    </li>
+                    <li>
+                      <span className="font-bold text-white">더블:</span> 두
+                      개의 패턴을 동시에 기억
+                    </li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="mb-1 font-semibold text-indigo-300">팁</p>
+                  <ul className="list-disc pl-4 space-y-1 text-white/60">
+                    <li>레벨이 올라갈수록 패턴이 복잡해집니다</li>
+                    <li>목숨이 3개! 틀리면 하나씩 줄어요</li>
+                    <li>패턴의 모양을 이미지로 기억하면 도움돼요</li>
+                  </ul>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowTutorial(false)}
+                className="mt-5 w-full rounded-xl bg-indigo-500 py-3 text-sm font-bold text-white transition-colors hover:bg-indigo-400"
+              >
+                알겠어요!
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

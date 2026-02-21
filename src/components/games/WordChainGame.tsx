@@ -75,6 +75,16 @@ export default function WordChainGame({
   const [errorMsg, setErrorMsg] = useState("");
   const [shaking, setShaking] = useState(false);
   const [bonusMsg, setBonusMsg] = useState("");
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Show tutorial on first visit
+  useEffect(() => {
+    const key = "neuroflex_wordchain_tutorial_seen";
+    if (!localStorage.getItem(key)) {
+      setShowTutorial(true);
+      localStorage.setItem(key, "1");
+    }
+  }, []);
 
   const inputRef = useRef<HTMLInputElement>(null);
   const timerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -271,7 +281,29 @@ export default function WordChainGame({
           animate={{ opacity: 1, y: 0 }}
           className="flex w-full max-w-sm flex-col items-center gap-6"
         >
-          <h1 className="text-2xl font-bold text-white">끝말잇기</h1>
+          <div className="flex items-center gap-2">
+            <h1 className="text-2xl font-bold text-white">끝말잇기</h1>
+            <button
+              type="button"
+              onClick={() => setShowTutorial(true)}
+              className="flex h-8 w-8 items-center justify-center rounded-full text-white/50 hover:bg-white/10"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </button>
+          </div>
           <p className="text-center text-sm text-white/60">
             컴퓨터와 끝말잇기 대결!
             <br />
@@ -401,6 +433,26 @@ export default function WordChainGame({
           <span className="text-2xl font-bold tabular-nums text-white">
             {score}
           </span>
+          <button
+            type="button"
+            onClick={() => setShowTutorial(true)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-white/50 hover:bg-white/10"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -534,6 +586,75 @@ export default function WordChainGame({
           </div>
         </div>
       </div>
+
+      {/* Tutorial Modal */}
+      <AnimatePresence>
+        {showTutorial && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+            onClick={() => setShowTutorial(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-2xl bg-slate-800 p-5 shadow-2xl"
+            >
+              <h2 className="mb-4 text-center text-lg font-bold text-white">
+                끝말잇기 플레이 방법
+              </h2>
+
+              <div className="space-y-4 text-sm text-white/80">
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">목표</p>
+                  <p>상대방(AI)과 끝말잇기를 해서 최대한 오래 버티세요!</p>
+                </div>
+
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">규칙</p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li>
+                      상대 단어의 마지막 글자로 시작하는 단어를 입력하세요
+                    </li>
+                    <li>
+                      예: &quot;사과&quot; → &quot;과일&quot; → &quot;일기&quot;
+                      → ...
+                    </li>
+                    <li>이미 사용한 단어는 다시 사용할 수 없습니다</li>
+                    <li>두음법칙이 적용됩니다 (례→예, 녀→여 등)</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">조작법</p>
+                  <p>입력창에 단어를 입력하고 전송 버튼을 누르세요</p>
+                </div>
+
+                <div>
+                  <p className="mb-1 font-semibold text-indigo-300">팁</p>
+                  <ul className="list-disc pl-4 space-y-1 text-white/60">
+                    <li>제한 시간 안에 답해야 합니다</li>
+                    <li>연속 정답 시 콤보 보너스!</li>
+                    <li>긴 단어일수록 높은 점수</li>
+                  </ul>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowTutorial(false)}
+                className="mt-5 w-full rounded-xl bg-indigo-500 py-3 text-sm font-bold text-white transition-colors hover:bg-indigo-400"
+              >
+                알겠어요!
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }

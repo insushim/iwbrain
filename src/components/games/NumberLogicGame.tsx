@@ -386,8 +386,18 @@ export default function NumberLogicGame({
   const [elapsed, setElapsed] = useState(0);
   const [completed, setCompleted] = useState(false);
   const [completedCells, setCompletedCells] = useState<Set<string>>(new Set());
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const completedRef = useRef(false);
+
+  // Show tutorial on first visit
+  useEffect(() => {
+    const key = "neuroflex_numberlogic_tutorial_seen";
+    if (!localStorage.getItem(key)) {
+      setShowTutorial(true);
+      localStorage.setItem(key, "1");
+    }
+  }, []);
 
   // Generate puzzle on mount
   useEffect(() => {
@@ -644,6 +654,25 @@ export default function NumberLogicGame({
           <span className="text-xs text-white/60">
             {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} ({n}x{n})
           </span>
+          <button
+            onClick={() => setShowTutorial(true)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-white/50 hover:bg-white/10"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -925,6 +954,72 @@ export default function NumberLogicGame({
           </motion.button>
         </div>
       </div>
+
+      {/* Tutorial Modal */}
+      <AnimatePresence>
+        {showTutorial && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+            onClick={() => setShowTutorial(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-2xl bg-slate-800 p-5 shadow-2xl"
+            >
+              <h2 className="mb-4 text-center text-lg font-bold text-white">
+                넘버 로직 플레이 방법
+              </h2>
+
+              <div className="space-y-4 text-sm text-white/80">
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">목표</p>
+                  <p>빈 칸에 숫자를 채워서 퍼즐을 완성하세요</p>
+                </div>
+
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">규칙</p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li>같은 행(가로줄)에 같은 숫자가 올 수 없습니다</li>
+                    <li>같은 열(세로줄)에 같은 숫자가 올 수 없습니다</li>
+                    <li>같은 블록(굵은 선) 안에 같은 숫자가 올 수 없습니다</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">조작법</p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li>빈 칸을 탭하여 선택하세요</li>
+                    <li>아래 숫자 버튼으로 숫자를 입력하세요</li>
+                    <li>힌트 버튼을 누르면 정답을 알려줍니다</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="mb-1 font-semibold text-indigo-300">팁</p>
+                  <ul className="list-disc pl-4 space-y-1 text-white/60">
+                    <li>확실한 칸부터 채우세요</li>
+                    <li>힌트를 적게 사용할수록 높은 점수!</li>
+                  </ul>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowTutorial(false)}
+                className="mt-5 w-full rounded-xl bg-indigo-500 py-3 text-sm font-bold text-white transition-colors hover:bg-indigo-400"
+              >
+                알겠어요!
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }

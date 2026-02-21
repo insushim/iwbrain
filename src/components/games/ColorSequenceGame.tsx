@@ -81,6 +81,16 @@ export default function ColorSequenceGame({
   const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
   const [scorePopup, setScorePopup] = useState<number | null>(null);
   const [shaking, setShaking] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // Show tutorial on first visit
+  useEffect(() => {
+    const key = "neuroflex_colorseq_tutorial_seen";
+    if (!localStorage.getItem(key)) {
+      setShowTutorial(true);
+      localStorage.setItem(key, "1");
+    }
+  }, []);
 
   const gameTimerRef = useRef<ReturnType<typeof setInterval>>(undefined);
   const qTimerRef = useRef<ReturnType<typeof setInterval>>(undefined);
@@ -428,6 +438,26 @@ export default function ColorSequenceGame({
               )}
             </AnimatePresence>
           </div>
+          <button
+            type="button"
+            onClick={() => setShowTutorial(true)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-white/50 hover:bg-white/10"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </button>
         </div>
       </div>
 
@@ -542,6 +572,69 @@ export default function ColorSequenceGame({
           ))}
         </div>
       </div>
+
+      {/* Tutorial Modal */}
+      <AnimatePresence>
+        {showTutorial && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+            onClick={() => setShowTutorial(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-2xl bg-slate-800 p-5 shadow-2xl"
+            >
+              <h2 className="mb-4 text-center text-lg font-bold text-white">
+                스트룹 색상 게임 방법
+              </h2>
+
+              <div className="space-y-4 text-sm text-white/80">
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">목표</p>
+                  <p>
+                    화면에 표시되는 색깔 순서를 기억하고 올바른 순서대로
+                    선택하세요
+                  </p>
+                </div>
+
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">
+                    플레이 방법
+                  </p>
+                  <ul className="list-disc pl-4 space-y-1">
+                    <li>색깔들이 순서대로 깜빡입니다</li>
+                    <li>깜빡이는 순서를 기억하세요</li>
+                    <li>같은 순서대로 색깔 버튼을 탭하세요</li>
+                  </ul>
+                </div>
+
+                <div>
+                  <p className="mb-1 font-semibold text-indigo-300">팁</p>
+                  <ul className="list-disc pl-4 space-y-1 text-white/60">
+                    <li>레벨이 올라갈수록 기억할 색깔이 늘어납니다</li>
+                    <li>연속 정답 시 콤보 보너스!</li>
+                    <li>제한 시간 안에 답해야 합니다</li>
+                  </ul>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowTutorial(false)}
+                className="mt-5 w-full rounded-xl bg-indigo-500 py-3 text-sm font-bold text-white transition-colors hover:bg-indigo-400"
+              >
+                알겠어요!
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </motion.div>
   );
 }
