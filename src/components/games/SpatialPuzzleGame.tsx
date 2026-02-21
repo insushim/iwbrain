@@ -663,7 +663,17 @@ export default function SpatialPuzzleGame({
   const [revealIdx, setRevealIdx] = useState(-1);
   const [isDragging, setIsDragging] = useState(false);
   const [dragMode, setDragMode] = useState<number | null>(null);
+  const [showTutorial, setShowTutorial] = useState(false);
   const elapsedRef = useRef<ReturnType<typeof setInterval>>(undefined);
+
+  // Show tutorial on first visit
+  useEffect(() => {
+    const key = "neuroflex_nonogram_tutorial_seen";
+    if (!localStorage.getItem(key)) {
+      setShowTutorial(true);
+      localStorage.setItem(key, "1");
+    }
+  }, []);
 
   const hints = useMemo(() => {
     if (!selectedPuzzle) return { rowHints: [], colHints: [] };
@@ -860,7 +870,26 @@ export default function SpatialPuzzleGame({
             </svg>
           </button>
           <h1 className="text-base font-semibold text-white">노노그램 퍼즐</h1>
-          <div className="w-9" />
+          <button
+            type="button"
+            onClick={() => setShowTutorial(true)}
+            className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 hover:bg-white/10"
+          >
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </button>
         </div>
 
         <div className="flex flex-1 flex-col gap-6 px-4 pt-16 pb-8">
@@ -960,9 +989,31 @@ export default function SpatialPuzzleGame({
             {selectedPuzzle.name}
           </span>
         </div>
-        <span className="text-sm font-mono tabular-nums text-white/60">
-          {minutes}:{seconds.toString().padStart(2, "0")}
-        </span>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setShowTutorial(true)}
+            className="flex h-8 w-8 items-center justify-center rounded-full text-white/50 hover:bg-white/10"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <circle cx="12" cy="12" r="10" />
+              <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+              <line x1="12" y1="17" x2="12.01" y2="17" />
+            </svg>
+          </button>
+          <span className="text-sm font-mono tabular-nums text-white/60">
+            {minutes}:{seconds.toString().padStart(2, "0")}
+          </span>
+        </div>
       </div>
 
       {/* Progress bar */}
@@ -1149,6 +1200,137 @@ export default function SpatialPuzzleGame({
           )}
         </AnimatePresence>
       </div>
+
+      {/* Tutorial Modal */}
+      <AnimatePresence>
+        {showTutorial && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+            onClick={() => setShowTutorial(false)}
+          >
+            <motion.div
+              initial={{ scale: 0.9, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.9, opacity: 0 }}
+              onClick={(e) => e.stopPropagation()}
+              className="w-full max-w-sm rounded-2xl bg-slate-800 p-5 shadow-2xl"
+            >
+              <h2 className="mb-4 text-center text-lg font-bold text-white">
+                노노그램 플레이 방법
+              </h2>
+
+              <div className="space-y-4 text-sm text-white/80">
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">목표</p>
+                  <p>숫자 힌트를 보고 칸을 채워서 숨겨진 그림을 완성하세요!</p>
+                </div>
+
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">
+                    숫자 힌트 읽는 법
+                  </p>
+                  <p className="mb-1">
+                    각 행/열 옆의 숫자는{" "}
+                    <span className="font-bold text-white">
+                      연속으로 채워야 할 칸의 수
+                    </span>
+                    를 의미합니다.
+                  </p>
+                  <div className="mt-2 rounded-lg bg-slate-700/60 p-3">
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="shrink-0 text-xs font-bold text-yellow-300 w-8 text-right">
+                        3
+                      </span>
+                      <div className="flex gap-0.5">
+                        <div className="h-5 w-5 rounded-sm bg-white/90" />
+                        <div className="h-5 w-5 rounded-sm bg-white/90" />
+                        <div className="h-5 w-5 rounded-sm bg-white/90" />
+                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                      </div>
+                      <span className="text-xs text-white/40">= 3칸 연속</span>
+                    </div>
+                    <div className="flex items-center gap-2 mb-2">
+                      <span className="shrink-0 text-xs font-bold text-yellow-300 w-8 text-right">
+                        1 2
+                      </span>
+                      <div className="flex gap-0.5">
+                        <div className="h-5 w-5 rounded-sm bg-white/90" />
+                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                        <div className="h-5 w-5 rounded-sm bg-white/90" />
+                        <div className="h-5 w-5 rounded-sm bg-white/90" />
+                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                      </div>
+                      <span className="text-xs text-white/40">
+                        = 1칸 + 빈칸 + 2칸
+                      </span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="shrink-0 text-xs font-bold text-green-400 w-8 text-right">
+                        0
+                      </span>
+                      <div className="flex gap-0.5">
+                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                      </div>
+                      <span className="text-xs text-white/40">= 전부 빈칸</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-2 font-semibold text-indigo-300">조작법</p>
+                  <div className="space-y-1.5">
+                    <div className="flex items-center gap-2">
+                      <span className="text-white/50">1번 탭:</span>
+                      <div className="h-4 w-4 rounded-sm bg-white/90" />
+                      <span>채우기</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white/50">2번 탭:</span>
+                      <div className="flex h-4 w-4 items-center justify-center rounded-sm border border-white/20 bg-white/5 text-[8px] font-bold text-white/40">
+                        X
+                      </div>
+                      <span>빈칸 확정 (메모용)</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-white/50">3번 탭:</span>
+                      <div className="h-4 w-4 rounded-sm border border-white/20 bg-white/5" />
+                      <span>원래대로</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="mb-1 font-semibold text-indigo-300">팁</p>
+                  <ul className="list-disc pl-4 space-y-1 text-white/60">
+                    <li>
+                      <span className="text-green-400">초록색</span> 숫자 = 해당
+                      줄 완성!
+                    </li>
+                    <li>드래그해서 여러 칸을 한번에 채울 수 있어요</li>
+                    <li>먼저 5x5 쉬운 퍼즐부터 시작해보세요</li>
+                  </ul>
+                </div>
+              </div>
+
+              <button
+                type="button"
+                onClick={() => setShowTutorial(false)}
+                className="mt-5 w-full rounded-xl bg-indigo-500 py-3 text-sm font-bold text-white transition-colors hover:bg-indigo-400"
+              >
+                알겠어요!
+              </button>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
