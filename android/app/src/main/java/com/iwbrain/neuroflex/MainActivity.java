@@ -11,7 +11,7 @@ import android.webkit.WebViewClient;
 
 public class MainActivity extends Activity {
 
-    private static final String APP_URL = "https://neuroflex.pages.dev";
+    private static final String APP_URL = "https://neuroflex.simssijjang.workers.dev";
     private WebView webView;
 
     @Override
