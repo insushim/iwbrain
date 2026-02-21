@@ -15,7 +15,7 @@ jobs:
           node-version: 20
           cache: npm
       - run: npm ci
-      - run: npx opennextjs-cloudflare
+      - run: npx opennextjs-cloudflare build
       - run: npx wrangler deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
