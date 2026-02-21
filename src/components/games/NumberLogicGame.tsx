@@ -1,10 +1,11 @@
 "use client";
 
 import { motion, AnimatePresence } from "framer-motion";
-import { useState, useEffect, useCallback, useRef } from "react";
+import { useState, useEffect, useCallback, useRef, useMemo } from "react";
 import { SoundEffects, setVolume, setMuted } from "@/lib/sound";
 import { Haptic, setHapticEnabled } from "@/lib/haptic";
 import { useSettingsStore } from "@/stores/settingsStore";
+import confetti from "canvas-confetti";
 
 interface NumberLogicGameProps {
   difficulty: "easy" | "medium" | "hard" | "extreme";
@@ -17,6 +18,14 @@ interface Cage {
   operation: "+" | "-" | "\u00d7" | "\u00f7" | "";
   target: number;
   color: string;
+}
+
+interface UndoEntry {
+  r: number;
+  c: number;
+  prevValue: number;
+  prevMemos: Set<number>;
+  wasMemoMode: boolean;
 }
 
 const GRID_SIZES: Record<string, number> = {
@@ -32,17 +41,31 @@ const REVEAL_RATES: Record<string, number> = {
   extreme: 0.1,
 };
 
-const CAGE_COLORS = [
-  "#FFE0E0",
-  "#E0F0FF",
-  "#E0FFE0",
-  "#FFF0E0",
-  "#F0E0FF",
-  "#E0FFF0",
-  "#FFE0F0",
-  "#F0FFE0",
-  "#E0E0FF",
+const CAGE_COLORS_DARK = [
+  "rgba(239,68,68,0.08)",
+  "rgba(59,130,246,0.08)",
+  "rgba(34,197,94,0.08)",
+  "rgba(251,191,36,0.08)",
+  "rgba(168,85,247,0.08)",
+  "rgba(20,184,166,0.08)",
+  "rgba(244,114,182,0.08)",
+  "rgba(132,204,22,0.08)",
+  "rgba(99,102,241,0.08)",
 ];
+
+const DIFFICULTY_LABELS: Record<string, string> = {
+  easy: "쉬움",
+  medium: "보통",
+  hard: "어려움",
+  extreme: "극한",
+};
+
+const DIFFICULTY_COLORS: Record<string, string> = {
+  easy: "from-emerald-500 to-emerald-600",
+  medium: "from-blue-500 to-blue-600",
+  hard: "from-orange-500 to-orange-600",
+  extreme: "from-red-500 to-red-600",
+};
 
 // --- Puzzle Generation ---
 
@@ -143,7 +166,7 @@ function generateCages(solution: number[][]): Cage[] {
           }
         }
       } else {
-        // 3+ cells: use + or ×
+        // 3+ cells: use + or x
         if (Math.random() < 0.5) {
           operation = "+";
           target = values.reduce((s, v) => s + v, 0);
@@ -157,7 +180,7 @@ function generateCages(solution: number[][]): Cage[] {
         cells: cageCells,
         operation,
         target,
-        color: CAGE_COLORS[colorIdx % CAGE_COLORS.length],
+        color: CAGE_COLORS_DARK[colorIdx % CAGE_COLORS_DARK.length],
       });
       colorIdx++;
     }
@@ -188,7 +211,7 @@ function solvePuzzle(
   }
 
   if (emptyR === -1) {
-    // All filled — check all cage constraints
+    // All filled -- check all cage constraints
     for (const cage of cages) {
       if (!checkCageComplete(cage, grid)) return false;
     }
@@ -262,7 +285,7 @@ function isCagePartiallyValid(cage: Cage, grid: number[][]): boolean {
     if (cage.operation === "\u00d7") {
       return filled.reduce((p, v) => p * v, 1) <= cage.target;
     }
-    return true; // Can't partially validate - and ÷
+    return true; // Can't partially validate - and /
   }
   return checkCageComplete(cage, grid);
 }
@@ -350,6 +373,58 @@ function generatePuzzle(difficulty: "easy" | "medium" | "hard" | "extreme"): {
   return { solution, cages, revealed };
 }
 
+// --- Ripple Component ---
+function RippleButton({
+  children,
+  onClick,
+  className,
+  style,
+  disabled,
+  ...props
+}: React.ButtonHTMLAttributes<HTMLButtonElement>) {
+  const [ripples, setRipples] = useState<
+    { x: number; y: number; id: number }[]
+  >([]);
+
+  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const y = e.clientY - rect.top;
+    const id = Date.now();
+    setRipples((prev) => [...prev, { x, y, id }]);
+    setTimeout(() => {
+      setRipples((prev) => prev.filter((r) => r.id !== id));
+    }, 600);
+    onClick?.(e);
+  };
+
+  return (
+    <motion.button
+      whileTap={{ scale: 0.92 }}
+      onClick={handleClick}
+      className={`relative overflow-hidden ${className || ""}`}
+      style={style}
+      disabled={disabled}
+      {...(props as Record<string, unknown>)}
+    >
+      {ripples.map((ripple) => (
+        <span
+          key={ripple.id}
+          className="pointer-events-none absolute rounded-full bg-white/30"
+          style={{
+            left: ripple.x - 20,
+            top: ripple.y - 20,
+            width: 40,
+            height: 40,
+            animation: "ripple-expand 0.6s ease-out forwards",
+          }}
+        />
+      ))}
+      {children}
+    </motion.button>
+  );
+}
+
 // --- Component ---
 
 export default function NumberLogicGame({
@@ -387,6 +462,9 @@ export default function NumberLogicGame({
   const [completed, setCompleted] = useState(false);
   const [completedCells, setCompletedCells] = useState<Set<string>>(new Set());
   const [showTutorial, setShowTutorial] = useState(false);
+  const [hintedCell, setHintedCell] = useState<string | null>(null);
+  const [undoStack, setUndoStack] = useState<UndoEntry[]>([]);
+  const [conflictFlash, setConflictFlash] = useState<Set<string>>(new Set());
 
   const completedRef = useRef(false);
 
@@ -420,6 +498,21 @@ export default function NumberLogicGame({
     return () => clearInterval(interval);
   }, [startTime, completed]);
 
+  // Progress tracking
+  const filledCount = useMemo(() => {
+    if (!userGrid.length) return 0;
+    let count = 0;
+    for (let r = 0; r < n; r++) {
+      for (let c = 0; c < n; c++) {
+        if (userGrid[r]?.[c] > 0) count++;
+      }
+    }
+    return count;
+  }, [userGrid, n]);
+
+  const totalCells = n * n;
+  const progressPercent = totalCells > 0 ? (filledCount / totalCells) * 100 : 0;
+
   // Validate row/col duplicates
   const validate = useCallback(
     (grid: number[][]) => {
@@ -445,6 +538,29 @@ export default function NumberLogicGame({
       }
       setErrors(errs);
       return errs.size === 0;
+    },
+    [n],
+  );
+
+  // Flash conflicting cells when error is made
+  const flashConflicts = useCallback(
+    (r: number, c: number, num: number, grid: number[][]) => {
+      const flashing = new Set<string>();
+      for (let c2 = 0; c2 < n; c2++) {
+        if (c2 !== c && grid[r][c2] === num) {
+          flashing.add(`${r},${c2}`);
+        }
+      }
+      for (let r2 = 0; r2 < n; r2++) {
+        if (r2 !== r && grid[r2][c] === num) {
+          flashing.add(`${r2},${c}`);
+        }
+      }
+      if (flashing.size > 0) {
+        flashing.add(`${r},${c}`);
+        setConflictFlash(flashing);
+        setTimeout(() => setConflictFlash(new Set()), 800);
+      }
     },
     [n],
   );
@@ -475,6 +591,28 @@ export default function NumberLogicGame({
       SoundEffects.achievement();
       Haptic.achievement();
 
+      // Confetti burst
+      const duration = 2000;
+      const end = Date.now() + duration;
+      const frame = () => {
+        confetti({
+          particleCount: 3,
+          angle: 60,
+          spread: 55,
+          origin: { x: 0, y: 0.7 },
+          colors: ["#6C5CE7", "#00B894", "#FDCB6E", "#E17055", "#0984E3"],
+        });
+        confetti({
+          particleCount: 3,
+          angle: 120,
+          spread: 55,
+          origin: { x: 1, y: 0.7 },
+          colors: ["#6C5CE7", "#00B894", "#FDCB6E", "#E17055", "#0984E3"],
+        });
+        if (Date.now() < end) requestAnimationFrame(frame);
+      };
+      frame();
+
       // Wave animation
       const allCells: string[] = [];
       for (let r = 0; r < n; r++) {
@@ -485,11 +623,11 @@ export default function NumberLogicGame({
       allCells.forEach((key, idx) => {
         setTimeout(() => {
           setCompletedCells((prev) => new Set(prev).add(key));
-        }, idx * 100);
+        }, idx * 80);
       });
 
       // Call onComplete after animation
-      const totalDelay = allCells.length * 100 + 500;
+      const totalDelay = allCells.length * 80 + 1500;
       setTimeout(() => {
         const timeTaken = Math.floor((Date.now() - startTime) / 1000);
         const baseScore =
@@ -522,7 +660,13 @@ export default function NumberLogicGame({
 
   const handleCellTap = (r: number, c: number) => {
     if (completed) return;
-    if (puzzle && puzzle.revealed[r][c] !== 0) return; // Can't select revealed cells
+    if (puzzle && puzzle.revealed[r][c] !== 0) {
+      // Allow selecting revealed cells to highlight same numbers
+      setSelectedCell([r, c]);
+      SoundEffects.click();
+      Haptic.button();
+      return;
+    }
     SoundEffects.click();
     Haptic.button();
     if (selectedCell && selectedCell[0] === r && selectedCell[1] === c) {
@@ -538,6 +682,17 @@ export default function NumberLogicGame({
     if (puzzle.revealed[r][c] !== 0) return;
 
     if (memoMode) {
+      // Save undo state for memos
+      setUndoStack((prev) => [
+        ...prev,
+        {
+          r,
+          c,
+          prevValue: userGrid[r][c],
+          prevMemos: new Set(memos[r][c]),
+          wasMemoMode: true,
+        },
+      ]);
       setMemos((prev) => {
         const next = prev.map((row) => row.map((s) => new Set(s)));
         if (next[r][c].has(num)) {
@@ -548,6 +703,17 @@ export default function NumberLogicGame({
         return next;
       });
     } else {
+      // Save undo state
+      setUndoStack((prev) => [
+        ...prev,
+        {
+          r,
+          c,
+          prevValue: userGrid[r][c],
+          prevMemos: new Set(memos[r][c]),
+          wasMemoMode: false,
+        },
+      ]);
       setUserGrid((prev) => {
         const next = prev.map((row) => [...row]);
         if (next[r][c] === num) {
@@ -563,6 +729,7 @@ export default function NumberLogicGame({
           // Track errors
           if (num !== puzzle.solution[r][c]) {
             setErrorCount((prev) => prev + 1);
+            flashConflicts(r, c, num, next);
           }
         }
         // Defer validation/completion checks
@@ -575,6 +742,34 @@ export default function NumberLogicGame({
     }
   };
 
+  const handleUndo = () => {
+    if (undoStack.length === 0 || completed) return;
+    const last = undoStack[undoStack.length - 1];
+    setUndoStack((prev) => prev.slice(0, -1));
+
+    if (last.wasMemoMode) {
+      setMemos((prev) => {
+        const next = prev.map((row) => row.map((s) => new Set(s)));
+        next[last.r][last.c] = new Set(last.prevMemos);
+        return next;
+      });
+    } else {
+      setUserGrid((prev) => {
+        const next = prev.map((row) => [...row]);
+        next[last.r][last.c] = last.prevValue;
+        setTimeout(() => validate(next), 0);
+        return next;
+      });
+      setMemos((prev) => {
+        const next = prev.map((row) => row.map((s) => new Set(s)));
+        next[last.r][last.c] = new Set(last.prevMemos);
+        return next;
+      });
+    }
+    SoundEffects.click();
+    Haptic.button();
+  };
+
   const handleHint = () => {
     if (!puzzle || !selectedCell || hintsUsed >= 3 || completed) return;
     const [r, c] = selectedCell;
@@ -583,6 +778,12 @@ export default function NumberLogicGame({
 
     SoundEffects.hint();
     Haptic.correct();
+
+    // Show golden sparkle
+    const cellKey = `${r},${c}`;
+    setHintedCell(cellKey);
+    setTimeout(() => setHintedCell(null), 1200);
+
     setUserGrid((prev) => {
       const next = prev.map((row) => [...row]);
       next[r][c] = puzzle.solution[r][c];
@@ -605,6 +806,18 @@ export default function NumberLogicGame({
     const [r, c] = selectedCell;
     if (puzzle.revealed[r][c] !== 0) return;
 
+    // Save undo
+    setUndoStack((prev) => [
+      ...prev,
+      {
+        r,
+        c,
+        prevValue: userGrid[r][c],
+        prevMemos: new Set(memos[r][c]),
+        wasMemoMode: false,
+      },
+    ]);
+
     setUserGrid((prev) => {
       const next = prev.map((row) => [...row]);
       next[r][c] = 0;
@@ -621,11 +834,11 @@ export default function NumberLogicGame({
 
   if (!puzzle) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-gray-900">
+      <div className="flex min-h-screen items-center justify-center bg-[#0a0e1a]">
         <motion.div
           animate={{ rotate: 360 }}
           transition={{ repeat: Infinity, duration: 1, ease: "linear" }}
-          className="h-8 w-8 rounded-full border-2 border-white/30 border-t-white"
+          className="h-10 w-10 rounded-full border-2 border-white/20 border-t-blue-400"
         />
       </div>
     );
@@ -635,28 +848,69 @@ export default function NumberLogicGame({
   const selectedValue = selectedCell
     ? userGrid[selectedCell[0]][selectedCell[1]]
     : 0;
-  const cellSize = n <= 4 ? 64 : n <= 5 ? 56 : 48;
+  const cellSize = n <= 4 ? 68 : n <= 5 ? 58 : n <= 6 ? 50 : 44;
 
   return (
-    <div className="flex min-h-screen flex-col items-center bg-gray-900 px-4 py-6">
+    <div
+      className="relative flex min-h-screen flex-col items-center px-4 py-6"
+      style={{
+        background:
+          "linear-gradient(145deg, #0a0e1a 0%, #111827 50%, #0f172a 100%)",
+      }}
+    >
+      {/* Subtle grid pattern overlay */}
+      <div
+        className="pointer-events-none fixed inset-0 opacity-[0.03]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(255,255,255,0.1) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
+
       {/* Header */}
-      <div className="mb-4 flex w-full max-w-md items-center justify-between">
-        <button
+      <div className="relative z-10 mb-3 flex w-full max-w-md items-center justify-between">
+        <motion.button
+          whileTap={{ scale: 0.9 }}
           onClick={onBack}
-          className="rounded-lg bg-white/10 px-3 py-2 text-sm text-white hover:bg-white/20"
+          className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2 text-sm font-medium text-white/80 backdrop-blur-sm transition-colors hover:bg-white/10"
         >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+          >
+            <path d="M19 12H5" />
+            <path d="M12 19l-7-7 7-7" />
+          </svg>
           Back
-        </button>
-        <div className="text-lg font-bold text-white">
+        </motion.button>
+
+        {/* Timer */}
+        <div
+          className="rounded-xl border border-white/10 bg-white/5 px-4 py-2 font-mono text-lg font-bold tracking-wider text-white backdrop-blur-sm"
+          style={{
+            textShadow: "0 0 12px rgba(59,130,246,0.5)",
+          }}
+        >
           {formatTime(elapsed)}
         </div>
+
         <div className="flex items-center gap-2">
-          <span className="text-xs text-white/60">
-            {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)} ({n}x{n})
+          {/* Difficulty badge */}
+          <span
+            className={`rounded-lg bg-gradient-to-r ${DIFFICULTY_COLORS[difficulty]} px-2.5 py-1 text-xs font-bold text-white shadow-lg`}
+          >
+            {DIFFICULTY_LABELS[difficulty]}
           </span>
           <button
             onClick={() => setShowTutorial(true)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-white/50 hover:bg-white/10"
+            className="flex h-8 w-8 items-center justify-center rounded-full border border-white/10 text-white/40 transition-colors hover:bg-white/10 hover:text-white/70"
           >
             <svg
               width="16"
@@ -676,215 +930,430 @@ export default function NumberLogicGame({
         </div>
       </div>
 
-      {/* Error / Hint counters */}
-      <div className="mb-3 flex w-full max-w-md items-center justify-center gap-6 text-sm text-white/70">
-        <span>
-          Errors:{" "}
-          <span className={errorCount > 0 ? "text-red-400" : ""}>
+      {/* Progress bar */}
+      <div className="relative z-10 mb-2 w-full max-w-md">
+        <div className="flex items-center gap-3">
+          <div className="h-2 flex-1 overflow-hidden rounded-full bg-white/5">
+            <motion.div
+              className="h-full rounded-full"
+              style={{
+                background: "linear-gradient(90deg, #6366f1, #8b5cf6, #a78bfa)",
+              }}
+              initial={{ width: 0 }}
+              animate={{ width: `${progressPercent}%` }}
+              transition={{ type: "spring", stiffness: 100, damping: 20 }}
+            />
+          </div>
+          <span className="font-mono text-xs font-medium text-white/50">
+            {filledCount}/{totalCells}
+          </span>
+        </div>
+      </div>
+
+      {/* Stats row */}
+      <div className="relative z-10 mb-4 flex w-full max-w-md items-center justify-center gap-6 text-sm">
+        <span className="flex items-center gap-1.5 text-white/50">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className={errorCount > 0 ? "text-red-400" : ""}
+          >
+            <circle cx="12" cy="12" r="10" />
+            <line x1="15" y1="9" x2="9" y2="15" />
+            <line x1="9" y1="9" x2="15" y2="15" />
+          </svg>
+          <span className={errorCount > 0 ? "text-red-400 font-medium" : ""}>
             {errorCount}
           </span>
         </span>
-        <span>Hints: {hintsUsed}/3</span>
+        <span className="flex items-center gap-1.5 text-white/50">
+          <svg
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            className="text-amber-400/70"
+          >
+            <path d="M9 18h6" />
+            <path d="M10 22h4" />
+            <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14" />
+          </svg>
+          {hintsUsed}/3
+        </span>
       </div>
 
       {/* Grid */}
       <div
-        className="relative mb-6 rounded-lg bg-white p-0.5"
-        style={{ width: cellSize * n + 1, height: cellSize * n + 1 }}
+        className="relative z-10 mb-5 rounded-2xl border border-white/10 p-1"
+        style={{
+          width: cellSize * n + 10,
+          height: cellSize * n + 10,
+          background: "rgba(255,255,255,0.03)",
+          backdropFilter: "blur(12px)",
+          boxShadow:
+            "0 8px 32px rgba(0,0,0,0.3), inset 0 1px 0 rgba(255,255,255,0.05)",
+        }}
       >
-        {/* Cage backgrounds */}
-        {puzzle.cages.map((cage, ci) =>
-          cage.cells.map(([r, c], idx) => (
-            <div
-              key={`cage-bg-${ci}-${idx}`}
-              className="absolute"
-              style={{
-                top: r * cellSize + 0.5,
-                left: c * cellSize + 0.5,
+        <div
+          className="relative overflow-hidden rounded-xl"
+          style={{ width: cellSize * n + 2, height: cellSize * n + 2 }}
+        >
+          {/* Cage backgrounds */}
+          {puzzle.cages.map((cage, ci) =>
+            cage.cells.map(([r, c], idx) => {
+              const isCompleted = completedCells.has(`${r},${c}`);
+              const isError = errors.has(`${r},${c}`);
+              const isConflictFlash = conflictFlash.has(`${r},${c}`);
+              const isSameNumber =
+                selectedValue > 0 && userGrid[r][c] === selectedValue;
+              const isSelectedRow = selectedCell?.[0] === r;
+              const isSelectedCol = selectedCell?.[1] === c;
+              const isHighlightedLine =
+                (isSelectedRow || isSelectedCol) && !isCompleted;
+
+              let bgColor = cage.color;
+              if (isCompleted) bgColor = "rgba(34,197,94,0.15)";
+              else if (isConflictFlash) bgColor = "rgba(239,68,68,0.25)";
+              else if (isError) bgColor = "rgba(239,68,68,0.12)";
+              else if (isSameNumber) bgColor = "rgba(99,102,241,0.15)";
+              else if (isHighlightedLine) bgColor = "rgba(255,255,255,0.03)";
+
+              return (
+                <motion.div
+                  key={`cage-bg-${ci}-${idx}`}
+                  className="absolute"
+                  style={{
+                    top: r * cellSize + 1,
+                    left: c * cellSize + 1,
+                    width: cellSize,
+                    height: cellSize,
+                    backgroundColor: bgColor,
+                    transition: "background-color 0.25s ease",
+                  }}
+                  animate={
+                    isConflictFlash
+                      ? {
+                          backgroundColor: [
+                            "rgba(239,68,68,0.3)",
+                            "rgba(239,68,68,0.08)",
+                            "rgba(239,68,68,0.3)",
+                          ],
+                        }
+                      : {}
+                  }
+                  transition={
+                    isConflictFlash
+                      ? { duration: 0.4, repeat: 1, ease: "easeInOut" }
+                      : {}
+                  }
+                />
+              );
+            }),
+          )}
+
+          {/* Cage borders */}
+          {Array.from({ length: n }, (_, r) =>
+            Array.from({ length: n }, (_, c) => {
+              const ci = cageMap[r][c];
+              const borderStyle: React.CSSProperties = {
+                position: "absolute",
+                top: r * cellSize + 1,
+                left: c * cellSize + 1,
                 width: cellSize,
                 height: cellSize,
-                backgroundColor: completedCells.has(`${r},${c}`)
-                  ? "#86EFAC"
-                  : errors.has(`${r},${c}`)
-                    ? "#FECACA"
-                    : selectedValue > 0 && userGrid[r][c] === selectedValue
-                      ? "#BFDBFE"
-                      : cage.color,
-                transition: "background-color 0.2s",
-              }}
-            />
-          )),
-        )}
+                boxSizing: "border-box",
+                borderTop:
+                  r === 0 || cageMap[r - 1][c] !== ci
+                    ? "2px solid rgba(148,163,184,0.4)"
+                    : "1px solid rgba(148,163,184,0.1)",
+                borderBottom:
+                  r === n - 1 || cageMap[r + 1]?.[c] !== ci
+                    ? "2px solid rgba(148,163,184,0.4)"
+                    : "1px solid rgba(148,163,184,0.1)",
+                borderLeft:
+                  c === 0 || cageMap[r][c - 1] !== ci
+                    ? "2px solid rgba(148,163,184,0.4)"
+                    : "1px solid rgba(148,163,184,0.1)",
+                borderRight:
+                  c === n - 1 || cageMap[r][c + 1] !== ci
+                    ? "2px solid rgba(148,163,184,0.4)"
+                    : "1px solid rgba(148,163,184,0.1)",
+                pointerEvents: "none",
+              };
+              return <div key={`border-${r}-${c}`} style={borderStyle} />;
+            }),
+          )}
 
-        {/* Cage borders */}
-        {Array.from({ length: n }, (_, r) =>
-          Array.from({ length: n }, (_, c) => {
-            const ci = cageMap[r][c];
-            const borderStyle: React.CSSProperties = {
-              position: "absolute",
-              top: r * cellSize + 0.5,
-              left: c * cellSize + 0.5,
-              width: cellSize,
-              height: cellSize,
-              boxSizing: "border-box",
-              borderTop:
-                r === 0 || cageMap[r - 1][c] !== ci
-                  ? "2px solid #374151"
-                  : "1px solid #D1D5DB",
-              borderBottom:
-                r === n - 1 || cageMap[r + 1]?.[c] !== ci
-                  ? "2px solid #374151"
-                  : "1px solid #D1D5DB",
-              borderLeft:
-                c === 0 || cageMap[r][c - 1] !== ci
-                  ? "2px solid #374151"
-                  : "1px solid #D1D5DB",
-              borderRight:
-                c === n - 1 || cageMap[r][c + 1] !== ci
-                  ? "2px solid #374151"
-                  : "1px solid #D1D5DB",
-              pointerEvents: "none",
-            };
-            return <div key={`border-${r}-${c}`} style={borderStyle} />;
-          }),
-        )}
-
-        {/* Cage labels */}
-        {puzzle.cages.map((cage, ci) => {
-          const [r, c] = cage.cells[0];
-          const label = cage.operation
-            ? `${cage.target}${cage.operation}`
-            : `${cage.target}`;
-          return (
-            <div
-              key={`label-${ci}`}
-              className="absolute z-10 text-[10px] font-bold leading-none text-gray-700"
-              style={{
-                top: r * cellSize + 3,
-                left: c * cellSize + 3,
-              }}
-            >
-              {label}
-            </div>
-          );
-        })}
-
-        {/* Cells */}
-        {Array.from({ length: n }, (_, r) =>
-          Array.from({ length: n }, (_, c) => {
-            const value = userGrid[r][c];
-            const isRevealed = puzzle.revealed[r][c] !== 0;
-            const isSelected =
-              selectedCell?.[0] === r && selectedCell?.[1] === c;
-            const isError = errors.has(`${r},${c}`);
-            const cellMemos = memos[r]?.[c] || new Set<number>();
-
+          {/* Cage labels */}
+          {puzzle.cages.map((cage, ci) => {
+            const [r, c] = cage.cells[0];
+            const label = cage.operation
+              ? `${cage.target}${cage.operation}`
+              : `${cage.target}`;
             return (
-              <motion.div
-                key={`cell-${r}-${c}`}
-                className="absolute flex cursor-pointer items-center justify-center"
+              <div
+                key={`label-${ci}`}
+                className="absolute z-10 font-bold leading-none"
                 style={{
-                  top: r * cellSize + 0.5,
-                  left: c * cellSize + 0.5,
-                  width: cellSize,
-                  height: cellSize,
-                  zIndex: isSelected ? 20 : 10,
+                  top: r * cellSize + 4,
+                  left: c * cellSize + 4,
+                  fontSize: cellSize <= 48 ? 8 : 10,
+                  color: "rgba(167,139,250,0.7)",
+                  textShadow: "0 0 4px rgba(167,139,250,0.2)",
                 }}
-                onClick={() => handleCellTap(r, c)}
-                whileTap={isRevealed ? {} : { scale: 0.95 }}
               >
-                {/* Selection highlight */}
-                {isSelected && (
-                  <motion.div
-                    layoutId="cell-selection"
-                    className="absolute inset-0 rounded-sm"
-                    style={{
-                      border: "3px solid #3B82F6",
-                      zIndex: 5,
-                    }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
-                  />
-                )}
-
-                {/* Value */}
-                {value > 0 ? (
-                  <AnimatePresence mode="popLayout">
-                    <motion.span
-                      key={value}
-                      initial={{ scale: 0.5, opacity: 0 }}
-                      animate={{ scale: 1, opacity: 1 }}
-                      exit={{ scale: 0.5, opacity: 0 }}
-                      className={`text-center font-bold ${
-                        isRevealed
-                          ? "text-gray-800"
-                          : isError
-                            ? "text-red-600"
-                            : "text-blue-600"
-                      }`}
-                      style={{ fontSize: cellSize * 0.45 }}
-                    >
-                      {value}
-                    </motion.span>
-                  </AnimatePresence>
-                ) : cellMemos.size > 0 ? (
-                  <div
-                    className="grid gap-0"
-                    style={{
-                      gridTemplateColumns: `repeat(${Math.ceil(Math.sqrt(n))}, 1fr)`,
-                      width: cellSize - 16,
-                      height: cellSize - 16,
-                      marginTop: 6,
-                    }}
-                  >
-                    {Array.from({ length: n }, (_, i) => i + 1).map((num) => (
-                      <span
-                        key={num}
-                        className="text-center text-[9px] leading-tight text-gray-500"
-                      >
-                        {cellMemos.has(num) ? num : ""}
-                      </span>
-                    ))}
-                  </div>
-                ) : null}
-              </motion.div>
+                {label}
+              </div>
             );
-          }),
-        )}
+          })}
+
+          {/* Cells */}
+          {Array.from({ length: n }, (_, r) =>
+            Array.from({ length: n }, (_, c) => {
+              const value = userGrid[r][c];
+              const isRevealed = puzzle.revealed[r][c] !== 0;
+              const isSelected =
+                selectedCell?.[0] === r && selectedCell?.[1] === c;
+              const isError = errors.has(`${r},${c}`);
+              const isHinted = hintedCell === `${r},${c}`;
+              const isWaved = completedCells.has(`${r},${c}`);
+              const cellMemos = memos[r]?.[c] || new Set<number>();
+
+              return (
+                <motion.div
+                  key={`cell-${r}-${c}`}
+                  className="absolute flex cursor-pointer items-center justify-center"
+                  style={{
+                    top: r * cellSize + 1,
+                    left: c * cellSize + 1,
+                    width: cellSize,
+                    height: cellSize,
+                    zIndex: isSelected ? 20 : 10,
+                  }}
+                  onClick={() => handleCellTap(r, c)}
+                  whileTap={isRevealed ? {} : { scale: 0.93 }}
+                  animate={
+                    isWaved
+                      ? {
+                          scale: [1, 1.15, 1],
+                          transition: { duration: 0.4, ease: "easeOut" },
+                        }
+                      : {}
+                  }
+                >
+                  {/* Selection glow ring */}
+                  {isSelected && (
+                    <motion.div
+                      layoutId="cell-selection"
+                      className="absolute inset-0.5 rounded-lg"
+                      style={{
+                        border: "2px solid rgba(99,102,241,0.8)",
+                        boxShadow:
+                          "0 0 12px rgba(99,102,241,0.4), inset 0 0 8px rgba(99,102,241,0.1)",
+                      }}
+                      transition={{
+                        type: "spring",
+                        stiffness: 500,
+                        damping: 30,
+                      }}
+                    />
+                  )}
+
+                  {/* Hint sparkle */}
+                  <AnimatePresence>
+                    {isHinted && (
+                      <>
+                        {[...Array(6)].map((_, i) => (
+                          <motion.div
+                            key={`sparkle-${i}`}
+                            className="absolute"
+                            initial={{
+                              opacity: 1,
+                              scale: 0,
+                              x: 0,
+                              y: 0,
+                            }}
+                            animate={{
+                              opacity: 0,
+                              scale: 1.5,
+                              x: Math.cos((i * Math.PI * 2) / 6) * 20,
+                              y: Math.sin((i * Math.PI * 2) / 6) * 20,
+                            }}
+                            exit={{ opacity: 0 }}
+                            transition={{
+                              duration: 0.8,
+                              delay: i * 0.05,
+                              ease: "easeOut",
+                            }}
+                          >
+                            <svg width="8" height="8" viewBox="0 0 8 8">
+                              <path
+                                d="M4 0L4.8 3.2L8 4L4.8 4.8L4 8L3.2 4.8L0 4L3.2 3.2Z"
+                                fill="#FBBF24"
+                              />
+                            </svg>
+                          </motion.div>
+                        ))}
+                        <motion.div
+                          className="absolute inset-0 rounded-lg"
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: [0, 0.4, 0] }}
+                          transition={{ duration: 0.8 }}
+                          style={{
+                            background:
+                              "radial-gradient(circle, rgba(251,191,36,0.3) 0%, transparent 70%)",
+                          }}
+                        />
+                      </>
+                    )}
+                  </AnimatePresence>
+
+                  {/* Value */}
+                  {value > 0 ? (
+                    <AnimatePresence mode="popLayout">
+                      <motion.span
+                        key={value}
+                        initial={{ scale: 0.5, opacity: 0 }}
+                        animate={{
+                          scale: 1,
+                          opacity: 1,
+                        }}
+                        exit={{ scale: 0.5, opacity: 0 }}
+                        className="text-center font-bold"
+                        style={{
+                          fontSize: cellSize * 0.42,
+                          color: isRevealed
+                            ? "rgba(226,232,240,0.95)"
+                            : isError
+                              ? "#f87171"
+                              : isHinted
+                                ? "#fbbf24"
+                                : "#818cf8",
+                          textShadow: isRevealed
+                            ? "none"
+                            : isError
+                              ? "0 0 8px rgba(248,113,113,0.4)"
+                              : isHinted
+                                ? "0 0 12px rgba(251,191,36,0.6)"
+                                : "0 0 8px rgba(129,140,248,0.3)",
+                          fontWeight: isRevealed ? 700 : 600,
+                        }}
+                      >
+                        {value}
+                      </motion.span>
+                    </AnimatePresence>
+                  ) : cellMemos.size > 0 ? (
+                    <div
+                      className="grid gap-0"
+                      style={{
+                        gridTemplateColumns: `repeat(${Math.ceil(Math.sqrt(n))}, 1fr)`,
+                        width: cellSize - 16,
+                        height: cellSize - 16,
+                        marginTop: 6,
+                      }}
+                    >
+                      {Array.from({ length: n }, (_, i) => i + 1).map((num) => (
+                        <span
+                          key={num}
+                          className="text-center leading-tight"
+                          style={{
+                            fontSize: cellSize <= 48 ? 7 : 9,
+                            color: cellMemos.has(num)
+                              ? "rgba(167,139,250,0.7)"
+                              : "transparent",
+                          }}
+                        >
+                          {num}
+                        </span>
+                      ))}
+                    </div>
+                  ) : null}
+                </motion.div>
+              );
+            }),
+          )}
+        </div>
       </div>
 
       {/* Controls */}
-      <div className="flex w-full max-w-md flex-col items-center gap-3">
+      <div className="relative z-10 flex w-full max-w-md flex-col items-center gap-3">
         {/* Number keypad */}
         <div className="flex flex-wrap justify-center gap-2">
-          {Array.from({ length: n }, (_, i) => i + 1).map((num) => (
-            <motion.button
-              key={num}
-              whileTap={{ scale: 0.9 }}
-              onClick={() => handleNumberInput(num)}
-              className={`flex items-center justify-center rounded-lg font-bold text-white ${
-                selectedCell &&
-                userGrid[selectedCell[0]][selectedCell[1]] === num
-                  ? "bg-blue-500"
-                  : "bg-white/15 hover:bg-white/25"
-              }`}
-              style={{ width: 48, height: 48, fontSize: 20 }}
-            >
-              {num}
-            </motion.button>
-          ))}
+          {Array.from({ length: n }, (_, i) => i + 1).map((num) => {
+            const isActive =
+              selectedCell &&
+              userGrid[selectedCell[0]][selectedCell[1]] === num;
+            return (
+              <RippleButton
+                key={num}
+                onClick={() => handleNumberInput(num)}
+                className={`flex items-center justify-center rounded-xl font-bold transition-all ${
+                  isActive
+                    ? "border border-indigo-400/50 bg-indigo-500/30 text-indigo-300"
+                    : "border border-white/10 bg-white/5 text-white/80 hover:bg-white/10"
+                }`}
+                style={{
+                  width: 50,
+                  height: 50,
+                  fontSize: 20,
+                  backdropFilter: "blur(8px)",
+                  boxShadow: isActive
+                    ? "0 0 16px rgba(99,102,241,0.3), inset 0 1px 0 rgba(255,255,255,0.1)"
+                    : "inset 0 1px 0 rgba(255,255,255,0.05)",
+                }}
+              >
+                {num}
+              </RippleButton>
+            );
+          })}
         </div>
 
         {/* Action buttons */}
-        <div className="flex items-center gap-3">
-          {/* Erase */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
-            onClick={handleErase}
-            className="flex items-center gap-1 rounded-lg bg-white/10 px-4 py-2 text-sm text-white hover:bg-white/20"
+        <div className="flex items-center gap-2">
+          {/* Undo */}
+          <RippleButton
+            onClick={handleUndo}
+            disabled={undoStack.length === 0 || completed}
+            className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-medium backdrop-blur-sm ${
+              undoStack.length === 0 || completed
+                ? "border-white/5 bg-white/[0.02] text-white/20 cursor-not-allowed"
+                : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
+            }`}
           >
             <svg
-              width="16"
-              height="16"
+              width="15"
+              height="15"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M3 7v6h6" />
+              <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+            </svg>
+            Undo
+          </RippleButton>
+
+          {/* Erase */}
+          <RippleButton
+            onClick={handleErase}
+            className="flex items-center gap-1.5 rounded-xl border border-white/10 bg-white/5 px-3.5 py-2.5 text-sm font-medium text-white/70 backdrop-blur-sm hover:bg-white/10"
+          >
+            <svg
+              width="15"
+              height="15"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -897,21 +1366,20 @@ export default function NumberLogicGame({
               <line x1="12" y1="9" x2="18" y2="15" />
             </svg>
             Erase
-          </motion.button>
+          </RippleButton>
 
           {/* Memo toggle */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
+          <RippleButton
             onClick={() => setMemoMode(!memoMode)}
-            className={`flex items-center gap-1 rounded-lg px-4 py-2 text-sm font-medium ${
+            className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-medium backdrop-blur-sm ${
               memoMode
-                ? "bg-blue-500 text-white"
-                : "bg-white/10 text-white hover:bg-white/20"
+                ? "border-blue-400/30 bg-blue-500/20 text-blue-300"
+                : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
             }`}
           >
             <svg
-              width="16"
-              height="16"
+              width="15"
+              height="15"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -922,23 +1390,22 @@ export default function NumberLogicGame({
               <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" />
               <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" />
             </svg>
-            Memo {memoMode ? "ON" : "OFF"}
-          </motion.button>
+            Memo
+          </RippleButton>
 
           {/* Hint */}
-          <motion.button
-            whileTap={{ scale: 0.9 }}
+          <RippleButton
             onClick={handleHint}
             disabled={hintsUsed >= 3 || !selectedCell}
-            className={`flex items-center gap-1 rounded-lg px-4 py-2 text-sm ${
+            className={`flex items-center gap-1.5 rounded-xl border px-3.5 py-2.5 text-sm font-medium backdrop-blur-sm ${
               hintsUsed >= 3 || !selectedCell
-                ? "bg-white/5 text-white/30 cursor-not-allowed"
-                : "bg-yellow-500/20 text-yellow-300 hover:bg-yellow-500/30"
+                ? "border-white/5 bg-white/[0.02] text-white/20 cursor-not-allowed"
+                : "border-amber-400/20 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20"
             }`}
           >
             <svg
-              width="16"
-              height="16"
+              width="15"
+              height="15"
               viewBox="0 0 24 24"
               fill="none"
               stroke="currentColor"
@@ -951,9 +1418,146 @@ export default function NumberLogicGame({
               <path d="M15.09 14c.18-.98.65-1.74 1.41-2.5A4.65 4.65 0 0 0 18 8 6 6 0 0 0 6 8c0 1 .23 2.23 1.5 3.5A4.61 4.61 0 0 1 8.91 14" />
             </svg>
             {3 - hintsUsed}
-          </motion.button>
+          </RippleButton>
         </div>
       </div>
+
+      {/* Completion overlay */}
+      <AnimatePresence>
+        {completed && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ delay: 0.5, duration: 0.5 }}
+            className="fixed inset-0 z-40 flex items-center justify-center"
+            style={{
+              background: "rgba(0,0,0,0.5)",
+              backdropFilter: "blur(8px)",
+            }}
+          >
+            <motion.div
+              initial={{ scale: 0.8, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              transition={{
+                delay: 0.8,
+                type: "spring",
+                stiffness: 200,
+                damping: 20,
+              }}
+              className="mx-4 w-full max-w-sm rounded-3xl border border-white/10 p-6 text-center"
+              style={{
+                background:
+                  "linear-gradient(145deg, rgba(15,23,42,0.95), rgba(30,41,59,0.95))",
+                boxShadow:
+                  "0 25px 50px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255,255,255,0.1)",
+              }}
+            >
+              <motion.div
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{ delay: 1, type: "spring", stiffness: 300 }}
+                className="mb-4 text-5xl"
+              >
+                <svg
+                  width="56"
+                  height="56"
+                  viewBox="0 0 56 56"
+                  className="mx-auto"
+                  fill="none"
+                >
+                  <circle
+                    cx="28"
+                    cy="28"
+                    r="26"
+                    stroke="url(#grad)"
+                    strokeWidth="3"
+                  />
+                  <motion.path
+                    d="M18 28L25 35L38 22"
+                    stroke="#34d399"
+                    strokeWidth="3.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    initial={{ pathLength: 0 }}
+                    animate={{ pathLength: 1 }}
+                    transition={{ delay: 1.2, duration: 0.5, ease: "easeOut" }}
+                  />
+                  <defs>
+                    <linearGradient id="grad" x1="0" y1="0" x2="56" y2="56">
+                      <stop offset="0%" stopColor="#6366f1" />
+                      <stop offset="100%" stopColor="#34d399" />
+                    </linearGradient>
+                  </defs>
+                </svg>
+              </motion.div>
+
+              <motion.h2
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 1.1 }}
+                className="mb-6 text-2xl font-bold text-white"
+              >
+                퍼즐 완성!
+              </motion.h2>
+
+              <div className="space-y-3">
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.3 }}
+                  className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-4 py-3"
+                >
+                  <span className="text-sm text-white/50">소요 시간</span>
+                  <span className="font-mono font-bold text-white">
+                    {formatTime(elapsed)}
+                  </span>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.5 }}
+                  className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-4 py-3"
+                >
+                  <span className="text-sm text-white/50">힌트 사용</span>
+                  <span className="font-bold text-amber-300">
+                    {hintsUsed}회
+                  </span>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.7 }}
+                  className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-4 py-3"
+                >
+                  <span className="text-sm text-white/50">오류 횟수</span>
+                  <span
+                    className={`font-bold ${errorCount === 0 ? "text-emerald-400" : "text-red-400"}`}
+                  >
+                    {errorCount}회
+                  </span>
+                </motion.div>
+
+                <motion.div
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: 1.9 }}
+                  className="flex items-center justify-between rounded-xl border border-white/5 bg-white/5 px-4 py-3"
+                >
+                  <span className="text-sm text-white/50">난이도</span>
+                  <span
+                    className={`rounded-lg bg-gradient-to-r ${DIFFICULTY_COLORS[difficulty]} px-2 py-0.5 text-xs font-bold text-white`}
+                  >
+                    {DIFFICULTY_LABELS[difficulty]} ({n}x{n})
+                  </span>
+                </motion.div>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Tutorial Modal */}
       <AnimatePresence>
@@ -962,7 +1566,11 @@ export default function NumberLogicGame({
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+            className="fixed inset-0 z-50 flex items-center justify-center px-4"
+            style={{
+              background: "rgba(0,0,0,0.7)",
+              backdropFilter: "blur(4px)",
+            }}
             onClick={() => setShowTutorial(false)}
           >
             <motion.div
@@ -1020,6 +1628,14 @@ export default function NumberLogicGame({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Inline style for ripple animation */}
+      <style>{`
+        @keyframes ripple-expand {
+          0% { transform: scale(1); opacity: 0.4; }
+          100% { transform: scale(4); opacity: 0; }
+        }
+      `}</style>
     </div>
   );
 }

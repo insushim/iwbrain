@@ -27,7 +27,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "heart",
     name: "Heart",
-    emoji: "❤️",
+    emoji: "\u2764\uFE0F",
     size: 5,
     grid: [
       [0, 1, 0, 1, 0],
@@ -40,7 +40,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "star",
     name: "Star",
-    emoji: "⭐",
+    emoji: "\u2B50",
     size: 5,
     grid: [
       [0, 0, 1, 0, 0],
@@ -53,7 +53,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "arrow",
     name: "Arrow",
-    emoji: "➡️",
+    emoji: "\u27A1\uFE0F",
     size: 5,
     grid: [
       [0, 0, 1, 0, 0],
@@ -66,7 +66,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "house",
     name: "House",
-    emoji: "🏠",
+    emoji: "\uD83C\uDFE0",
     size: 5,
     grid: [
       [0, 0, 1, 0, 0],
@@ -79,7 +79,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "tree",
     name: "Tree",
-    emoji: "🌲",
+    emoji: "\uD83C\uDF32",
     size: 5,
     grid: [
       [0, 0, 1, 0, 0],
@@ -92,7 +92,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "fish",
     name: "Fish",
-    emoji: "🐟",
+    emoji: "\uD83D\uDC1F",
     size: 5,
     grid: [
       [0, 1, 0, 0, 0],
@@ -105,7 +105,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "umbrella",
     name: "Umbrella",
-    emoji: "☂️",
+    emoji: "\u2602\uFE0F",
     size: 5,
     grid: [
       [0, 1, 1, 1, 0],
@@ -118,7 +118,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "boat",
     name: "Boat",
-    emoji: "⛵",
+    emoji: "\u26F5",
     size: 5,
     grid: [
       [0, 0, 1, 0, 0],
@@ -131,7 +131,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "key",
     name: "Key",
-    emoji: "🔑",
+    emoji: "\uD83D\uDD11",
     size: 5,
     grid: [
       [0, 1, 1, 0, 0],
@@ -144,7 +144,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "note",
     name: "Note",
-    emoji: "🎵",
+    emoji: "\uD83C\uDFB5",
     size: 5,
     grid: [
       [0, 0, 1, 1, 0],
@@ -157,7 +157,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "diamond",
     name: "Diamond",
-    emoji: "💎",
+    emoji: "\uD83D\uDC8E",
     size: 5,
     grid: [
       [0, 0, 1, 0, 0],
@@ -170,7 +170,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "cup",
     name: "Cup",
-    emoji: "☕",
+    emoji: "\u2615",
     size: 5,
     grid: [
       [1, 1, 1, 1, 1],
@@ -183,7 +183,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "lightning",
     name: "Lightning",
-    emoji: "⚡",
+    emoji: "\u26A1",
     size: 5,
     grid: [
       [0, 0, 1, 1, 0],
@@ -196,7 +196,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "cross",
     name: "Cross",
-    emoji: "✚",
+    emoji: "\u271A",
     size: 5,
     grid: [
       [0, 1, 1, 1, 0],
@@ -209,7 +209,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "moon",
     name: "Moon",
-    emoji: "🌙",
+    emoji: "\uD83C\uDF19",
     size: 5,
     grid: [
       [0, 1, 1, 0, 0],
@@ -223,7 +223,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "cat",
     name: "Cat",
-    emoji: "🐱",
+    emoji: "\uD83D\uDC31",
     size: 7,
     grid: [
       [0, 1, 0, 0, 0, 1, 0],
@@ -238,7 +238,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "dog",
     name: "Dog",
-    emoji: "🐶",
+    emoji: "\uD83D\uDC36",
     size: 7,
     grid: [
       [0, 1, 1, 0, 1, 1, 0],
@@ -253,7 +253,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "robot",
     name: "Robot",
-    emoji: "🤖",
+    emoji: "\uD83E\uDD16",
     size: 7,
     grid: [
       [0, 1, 1, 1, 1, 1, 0],
@@ -268,7 +268,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "plane",
     name: "Plane",
-    emoji: "✈️",
+    emoji: "\u2708\uFE0F",
     size: 7,
     grid: [
       [0, 0, 0, 1, 0, 0, 0],
@@ -283,7 +283,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "car",
     name: "Car",
-    emoji: "🚗",
+    emoji: "\uD83D\uDE97",
     size: 7,
     grid: [
       [0, 0, 0, 0, 0, 0, 0],
@@ -298,7 +298,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "flower",
     name: "Flower",
-    emoji: "🌸",
+    emoji: "\uD83C\uDF38",
     size: 7,
     grid: [
       [0, 0, 0, 1, 0, 0, 0],
@@ -313,7 +313,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "butterfly",
     name: "Butterfly",
-    emoji: "🦋",
+    emoji: "\uD83E\uDD8B",
     size: 7,
     grid: [
       [1, 0, 0, 0, 0, 0, 1],
@@ -328,7 +328,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "mushroom",
     name: "Mushroom",
-    emoji: "🍄",
+    emoji: "\uD83C\uDF44",
     size: 7,
     grid: [
       [0, 0, 1, 1, 1, 0, 0],
@@ -343,7 +343,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "skull",
     name: "Skull",
-    emoji: "💀",
+    emoji: "\uD83D\uDC80",
     size: 7,
     grid: [
       [0, 1, 1, 1, 1, 1, 0],
@@ -358,7 +358,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "crown",
     name: "Crown",
-    emoji: "👑",
+    emoji: "\uD83D\uDC51",
     size: 7,
     grid: [
       [0, 1, 0, 1, 0, 1, 0],
@@ -373,7 +373,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "penguin",
     name: "Penguin",
-    emoji: "🐧",
+    emoji: "\uD83D\uDC27",
     size: 7,
     grid: [
       [0, 0, 1, 1, 1, 0, 0],
@@ -388,7 +388,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "anchor",
     name: "Anchor",
-    emoji: "⚓",
+    emoji: "\u2693",
     size: 7,
     grid: [
       [0, 0, 0, 1, 0, 0, 0],
@@ -403,7 +403,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "ghost",
     name: "Ghost",
-    emoji: "👻",
+    emoji: "\uD83D\uDC7B",
     size: 7,
     grid: [
       [0, 0, 1, 1, 1, 0, 0],
@@ -418,7 +418,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "rocket",
     name: "Rocket",
-    emoji: "🚀",
+    emoji: "\uD83D\uDE80",
     size: 7,
     grid: [
       [0, 0, 0, 1, 0, 0, 0],
@@ -433,7 +433,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "cactus",
     name: "Cactus",
-    emoji: "🌵",
+    emoji: "\uD83C\uDF35",
     size: 7,
     grid: [
       [0, 0, 0, 1, 0, 0, 0],
@@ -449,7 +449,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "spaceship",
     name: "Spaceship",
-    emoji: "🚀",
+    emoji: "\uD83D\uDE80",
     size: 10,
     grid: [
       [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
@@ -467,7 +467,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "castle",
     name: "Castle",
-    emoji: "🏰",
+    emoji: "\uD83C\uDFF0",
     size: 10,
     grid: [
       [0, 1, 0, 1, 0, 0, 1, 0, 1, 0],
@@ -485,7 +485,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "dragon",
     name: "Dragon",
-    emoji: "🐉",
+    emoji: "\uD83D\uDC09",
     size: 10,
     grid: [
       [0, 0, 0, 1, 0, 0, 0, 0, 0, 0],
@@ -503,7 +503,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "piano",
     name: "Piano",
-    emoji: "🎹",
+    emoji: "\uD83C\uDFB9",
     size: 10,
     grid: [
       [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
@@ -521,7 +521,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "gamepad",
     name: "Gamepad",
-    emoji: "🎮",
+    emoji: "\uD83C\uDFAE",
     size: 10,
     grid: [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -539,7 +539,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "lighthouse",
     name: "Lighthouse",
-    emoji: "🗼",
+    emoji: "\uD83D\uDDFC",
     size: 10,
     grid: [
       [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
@@ -557,7 +557,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "camera",
     name: "Camera",
-    emoji: "📷",
+    emoji: "\uD83D\uDCF7",
     size: 10,
     grid: [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
@@ -575,7 +575,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "treasure",
     name: "Treasure",
-    emoji: "🏆",
+    emoji: "\uD83C\uDFC6",
     size: 10,
     grid: [
       [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
@@ -593,7 +593,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "skull10",
     name: "Pirate",
-    emoji: "☠️",
+    emoji: "\u2620\uFE0F",
     size: 10,
     grid: [
       [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
@@ -611,7 +611,7 @@ const PUZZLES: PuzzleData[] = [
   {
     id: "alien",
     name: "Alien",
-    emoji: "👾",
+    emoji: "\uD83D\uDC7E",
     size: 10,
     grid: [
       [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
@@ -629,10 +629,102 @@ const PUZZLES: PuzzleData[] = [
 ];
 
 const SIZE_GROUPS = [
-  { label: "5x5 (쉬움)", size: 5 },
-  { label: "7x7 (보통)", size: 7 },
-  { label: "10x10 (어려움)", size: 10 },
+  { label: "5x5 (\uC26C\uC6C0)", size: 5 },
+  { label: "7x7 (\uBCF4\uD1B5)", size: 7 },
+  { label: "10x10 (\uC5B4\uB824\uC6C0)", size: 10 },
 ];
+
+// ---- Best time helpers ----
+function getBestTime(puzzleId: string): number | null {
+  try {
+    const raw = localStorage.getItem(`nonogram_best_${puzzleId}`);
+    if (raw) return parseInt(raw, 10);
+  } catch {}
+  return null;
+}
+
+function saveBestTime(puzzleId: string, time: number) {
+  try {
+    const prev = getBestTime(puzzleId);
+    if (prev === null || time < prev) {
+      localStorage.setItem(`nonogram_best_${puzzleId}`, String(time));
+    }
+  } catch {}
+}
+
+function formatBestTime(seconds: number): string {
+  const m = Math.floor(seconds / 60);
+  const s = seconds % 60;
+  return m > 0 ? `${m}:${s.toString().padStart(2, "0")}` : `${s}s`;
+}
+
+// ---- Particle / confetti component ----
+function ConfettiParticles() {
+  const particles = useMemo(() => {
+    return Array.from({ length: 40 }, (_, i) => ({
+      id: i,
+      x: Math.random() * 100,
+      delay: Math.random() * 0.6,
+      duration: 1.5 + Math.random() * 1.5,
+      size: 4 + Math.random() * 6,
+      color: [
+        "#FFD700",
+        "#FF6B6B",
+        "#4ECDC4",
+        "#A78BFA",
+        "#34D399",
+        "#F472B6",
+        "#60A5FA",
+      ][i % 7],
+      rotation: Math.random() * 360,
+    }));
+  }, []);
+
+  return (
+    <div className="pointer-events-none fixed inset-0 z-40 overflow-hidden">
+      {particles.map((p) => (
+        <motion.div
+          key={p.id}
+          initial={{ y: -20, x: `${p.x}vw`, opacity: 1, rotate: 0 }}
+          animate={{
+            y: "110vh",
+            opacity: [1, 1, 0],
+            rotate: p.rotation + 720,
+          }}
+          transition={{
+            duration: p.duration,
+            delay: p.delay,
+            ease: "easeIn",
+          }}
+          className="absolute"
+          style={{
+            width: p.size,
+            height: p.size,
+            borderRadius: p.size > 7 ? "50%" : "1px",
+            backgroundColor: p.color,
+          }}
+        />
+      ))}
+    </div>
+  );
+}
+
+// ---- Ripple animation on cell tap ----
+function CellRipple({ active }: { active: boolean }) {
+  return (
+    <AnimatePresence>
+      {active && (
+        <motion.div
+          initial={{ scale: 0.3, opacity: 0.7 }}
+          animate={{ scale: 2.5, opacity: 0 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.5, ease: "easeOut" }}
+          className="pointer-events-none absolute inset-0 rounded-sm bg-white/30"
+        />
+      )}
+    </AnimatePresence>
+  );
+}
 
 export default function SpatialPuzzleGame({
   puzzleId,
@@ -664,6 +756,11 @@ export default function SpatialPuzzleGame({
   const [isDragging, setIsDragging] = useState(false);
   const [dragMode, setDragMode] = useState<number | null>(null);
   const [showTutorial, setShowTutorial] = useState(false);
+  const [rippleCell, setRippleCell] = useState<string | null>(null);
+  const [flashRows, setFlashRows] = useState<Set<number>>(new Set());
+  const [flashCols, setFlashCols] = useState<Set<number>>(new Set());
+  const [completedRows, setCompletedRows] = useState<Set<number>>(new Set());
+  const [completedCols, setCompletedCols] = useState<Set<number>>(new Set());
   const elapsedRef = useRef<ReturnType<typeof setInterval>>(undefined);
 
   // Show tutorial on first visit
@@ -698,6 +795,17 @@ export default function SpatialPuzzleGame({
     return count;
   }, [selectedPuzzle, playerGrid]);
 
+  // Count player filled cells (including wrong ones)
+  const playerFilledCount = useMemo(() => {
+    let count = 0;
+    for (const row of playerGrid) {
+      for (const cell of row) {
+        if (cell === 1) count++;
+      }
+    }
+    return count;
+  }, [playerGrid]);
+
   const isRowComplete = useCallback(
     (rowIdx: number) => {
       if (!selectedPuzzle) return false;
@@ -726,6 +834,49 @@ export default function SpatialPuzzleGame({
     [selectedPuzzle, playerGrid],
   );
 
+  // Detect row/col completion for flash feedback
+  useEffect(() => {
+    if (!selectedPuzzle || completed) return;
+    const size = selectedPuzzle.size;
+    const newCompletedRows = new Set<number>();
+    const newCompletedCols = new Set<number>();
+    for (let r = 0; r < size; r++) {
+      if (isRowComplete(r)) newCompletedRows.add(r);
+    }
+    for (let c = 0; c < size; c++) {
+      if (isColComplete(c)) newCompletedCols.add(c);
+    }
+    // Detect newly completed rows
+    for (const r of newCompletedRows) {
+      if (!completedRows.has(r)) {
+        setFlashRows((prev) => new Set(prev).add(r));
+        setTimeout(() => {
+          setFlashRows((prev) => {
+            const next = new Set(prev);
+            next.delete(r);
+            return next;
+          });
+        }, 600);
+      }
+    }
+    // Detect newly completed cols
+    for (const c of newCompletedCols) {
+      if (!completedCols.has(c)) {
+        setFlashCols((prev) => new Set(prev).add(c));
+        setTimeout(() => {
+          setFlashCols((prev) => {
+            const next = new Set(prev);
+            next.delete(c);
+            return next;
+          });
+        }, 600);
+      }
+    }
+    setCompletedRows(newCompletedRows);
+    setCompletedCols(newCompletedCols);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [playerGrid, selectedPuzzle, completed]);
+
   // Start puzzle
   const startPuzzle = useCallback((puzzle: PuzzleData) => {
     setSelectedPuzzle(puzzle);
@@ -736,6 +887,10 @@ export default function SpatialPuzzleGame({
     setStartTime(Date.now());
     setElapsed(0);
     setRevealIdx(-1);
+    setCompletedRows(new Set());
+    setCompletedCols(new Set());
+    setFlashRows(new Set());
+    setFlashCols(new Set());
   }, []);
 
   // Timer
@@ -766,6 +921,9 @@ export default function SpatialPuzzleGame({
     const timeBonus = Math.max(0, (selectedPuzzle.size * 60 - timeTaken) * 2);
     const finalScore = sizeBonus + timeBonus;
 
+    // Save best time
+    saveBestTime(selectedPuzzle.id, timeTaken);
+
     // Reveal animation
     let idx = 0;
     const interval = setInterval(() => {
@@ -794,7 +952,7 @@ export default function SpatialPuzzleGame({
       if (completed || !selectedPuzzle) return;
       setPlayerGrid((prev) => {
         const next = prev.map((r) => [...r]);
-        // Cycle: 0 → 1 → 2 → 0
+        // Cycle: 0 -> 1 -> 2 -> 0
         next[row][col] = (next[row][col] + 1) % 3;
         return next;
       });
@@ -811,6 +969,8 @@ export default function SpatialPuzzleGame({
       const currentVal = playerGrid[row]?.[col] ?? 0;
       const nextVal = (currentVal + 1) % 3;
       setDragMode(nextVal);
+      setRippleCell(`${row}-${col}`);
+      setTimeout(() => setRippleCell(null), 500);
       setPlayerGrid((prev) => {
         const next = prev.map((r) => [...r]);
         next[row][col] = nextVal;
@@ -848,12 +1008,23 @@ export default function SpatialPuzzleGame({
   // Puzzle selection screen
   if (!selectedPuzzle) {
     return (
-      <div className="flex min-h-screen flex-col bg-slate-900">
-        <div className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between bg-slate-900/90 px-4 py-3 backdrop-blur-md">
+      <div className="relative flex min-h-screen flex-col bg-gradient-to-b from-slate-950 via-slate-950 to-indigo-950">
+        {/* Blueprint grid pattern overlay */}
+        <div
+          className="pointer-events-none fixed inset-0 opacity-[0.04]"
+          style={{
+            backgroundImage:
+              "linear-gradient(rgba(99,102,241,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.8) 1px, transparent 1px)",
+            backgroundSize: "40px 40px",
+          }}
+        />
+
+        {/* Top bar with glass morphism */}
+        <div className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between border-b border-white/[0.06] bg-slate-950/60 px-4 py-3 backdrop-blur-xl">
           <button
             type="button"
             onClick={onBack}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 hover:bg-white/10"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10"
           >
             <svg
               width="20"
@@ -869,11 +1040,13 @@ export default function SpatialPuzzleGame({
               <path d="M12 19l-7-7 7-7" />
             </svg>
           </button>
-          <h1 className="text-base font-semibold text-white">노노그램 퍼즐</h1>
+          <h1 className="bg-gradient-to-r from-white to-white/70 bg-clip-text text-base font-bold tracking-tight text-transparent">
+            {"\uB178\uB178\uADF8\uB7A8 \uD37C\uC990"}
+          </h1>
           <button
             type="button"
             onClick={() => setShowTutorial(true)}
-            className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 hover:bg-white/10"
+            className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10"
           >
             <svg
               width="20"
@@ -892,18 +1065,27 @@ export default function SpatialPuzzleGame({
           </button>
         </div>
 
-        <div className="flex flex-1 flex-col gap-6 px-4 pt-16 pb-8">
+        <div className="relative flex flex-1 flex-col gap-8 px-4 pt-18 pb-8">
           {SIZE_GROUPS.map((group) => (
             <div key={group.size}>
-              <div className="mb-3 flex items-center justify-between">
-                <h2 className="text-sm font-semibold text-white/50">
-                  {group.label}
-                </h2>
+              {/* Group header with gradient underline */}
+              <div className="mb-4 flex items-center justify-between">
+                <div className="flex flex-col">
+                  <h2 className="text-sm font-bold tracking-wide text-white/60">
+                    {group.label}
+                  </h2>
+                  <div className="mt-1.5 h-[2px] w-16 rounded-full bg-gradient-to-r from-indigo-500 to-purple-500" />
+                </div>
                 <motion.button
                   type="button"
+                  whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
                   onClick={() => handleRandomPuzzle(group.size)}
-                  className="flex items-center gap-1.5 rounded-lg bg-indigo-500/20 px-3 py-1.5 text-xs font-semibold text-indigo-300 transition-colors hover:bg-indigo-500/30"
+                  className="relative flex items-center gap-1.5 overflow-hidden rounded-lg border border-indigo-400/20 bg-indigo-500/15 px-3.5 py-1.5 text-xs font-bold text-indigo-300 transition-all hover:border-indigo-400/40 hover:bg-indigo-500/25"
+                  style={{
+                    boxShadow:
+                      "0 0 20px rgba(99,102,241,0.15), 0 0 40px rgba(99,102,241,0.05)",
+                  }}
                 >
                   <svg
                     width="14"
@@ -921,28 +1103,45 @@ export default function SpatialPuzzleGame({
                     <line x1="15" y1="15" x2="21" y2="21" />
                     <line x1="4" y1="4" x2="9" y2="9" />
                   </svg>
-                  랜덤
+                  {"\uB79C\uB364"}
                 </motion.button>
               </div>
               <div className="grid grid-cols-5 gap-2">
-                {PUZZLES.filter((p) => p.size === group.size).map((puzzle) => (
-                  <motion.button
-                    key={puzzle.id}
-                    type="button"
-                    whileTap={{ scale: 0.95 }}
-                    onClick={() => startPuzzle(puzzle)}
-                    className="flex flex-col items-center gap-1 rounded-xl bg-white/5 p-3 transition-colors hover:bg-white/10"
-                  >
-                    <span className="text-2xl">{puzzle.emoji}</span>
-                    <span className="text-[10px] text-white/50">
-                      {puzzle.name}
-                    </span>
-                  </motion.button>
-                ))}
+                {PUZZLES.filter((p) => p.size === group.size).map((puzzle) => {
+                  const best = getBestTime(puzzle.id);
+                  return (
+                    <motion.button
+                      key={puzzle.id}
+                      type="button"
+                      whileHover={{ scale: 1.08, y: -2 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => startPuzzle(puzzle)}
+                      className="group relative flex flex-col items-center gap-1 overflow-hidden rounded-xl border border-white/[0.08] bg-white/[0.03] p-3 backdrop-blur-sm transition-all hover:border-white/[0.15] hover:bg-white/[0.07]"
+                    >
+                      <span className="text-2xl drop-shadow-lg transition-transform group-hover:scale-110">
+                        {puzzle.emoji}
+                      </span>
+                      <span className="text-[10px] font-medium text-white/40 transition-colors group-hover:text-white/60">
+                        {puzzle.name}
+                      </span>
+                      {best !== null && (
+                        <span className="text-[9px] font-mono text-emerald-400/60">
+                          {formatBestTime(best)}
+                        </span>
+                      )}
+                    </motion.button>
+                  );
+                })}
               </div>
             </div>
           ))}
         </div>
+
+        {/* Tutorial Modal */}
+        <TutorialModal
+          show={showTutorial}
+          onClose={() => setShowTutorial(false)}
+        />
       </div>
     );
   }
@@ -955,19 +1154,30 @@ export default function SpatialPuzzleGame({
   const progress = totalFilled > 0 ? (correctFilled / totalFilled) * 100 : 0;
   const minutes = Math.floor(elapsed / 60);
   const seconds = elapsed % 60;
+  const overfilled = playerFilledCount > totalFilled;
 
   return (
     <div
-      className="flex min-h-screen flex-col bg-slate-900"
+      className="relative flex min-h-screen flex-col bg-gradient-to-b from-slate-950 via-slate-950 to-indigo-950"
       onPointerUp={handlePointerUp}
       onPointerLeave={handlePointerUp}
     >
-      {/* Top bar */}
-      <div className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between bg-slate-900/90 px-4 py-3 backdrop-blur-md">
+      {/* Blueprint grid pattern overlay */}
+      <div
+        className="pointer-events-none fixed inset-0 opacity-[0.04]"
+        style={{
+          backgroundImage:
+            "linear-gradient(rgba(99,102,241,0.8) 1px, transparent 1px), linear-gradient(90deg, rgba(99,102,241,0.8) 1px, transparent 1px)",
+          backgroundSize: "40px 40px",
+        }}
+      />
+
+      {/* Top bar with glass morphism */}
+      <div className="fixed left-0 right-0 top-0 z-40 flex items-center justify-between border-b border-white/[0.06] bg-slate-950/60 px-4 py-3 backdrop-blur-xl">
         <button
           type="button"
           onClick={() => setSelectedPuzzle(null)}
-          className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 hover:bg-white/10"
+          className="flex h-9 w-9 items-center justify-center rounded-full text-white/70 transition-colors hover:bg-white/10"
         >
           <svg
             width="20"
@@ -983,17 +1193,17 @@ export default function SpatialPuzzleGame({
             <path d="M12 19l-7-7 7-7" />
           </svg>
         </button>
-        <div className="flex items-center gap-3">
-          <span className="text-lg">{selectedPuzzle.emoji}</span>
-          <span className="text-sm font-semibold text-white">
+        <div className="flex items-center gap-2.5">
+          <span className="text-lg drop-shadow-lg">{selectedPuzzle.emoji}</span>
+          <span className="text-sm font-bold tracking-tight text-white">
             {selectedPuzzle.name}
           </span>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2.5">
           <button
             type="button"
             onClick={() => setShowTutorial(true)}
-            className="flex h-8 w-8 items-center justify-center rounded-full text-white/50 hover:bg-white/10"
+            className="flex h-8 w-8 items-center justify-center rounded-full text-white/50 transition-colors hover:bg-white/10"
           >
             <svg
               width="16"
@@ -1010,32 +1220,116 @@ export default function SpatialPuzzleGame({
               <line x1="12" y1="17" x2="12.01" y2="17" />
             </svg>
           </button>
-          <span className="text-sm font-mono tabular-nums text-white/60">
-            {minutes}:{seconds.toString().padStart(2, "0")}
-          </span>
+          {/* Timer with pulsing dot */}
+          <div className="flex items-center gap-1.5">
+            {!completed && (
+              <motion.div
+                animate={{ opacity: [1, 0.3, 1] }}
+                transition={{
+                  duration: 1.5,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+                className="h-1.5 w-1.5 rounded-full bg-emerald-400"
+                style={{ boxShadow: "0 0 6px rgba(52,211,153,0.5)" }}
+              />
+            )}
+            <span
+              className="text-sm tabular-nums text-white/60"
+              style={{
+                fontFamily:
+                  "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
+                fontWeight: 600,
+                letterSpacing: "0.05em",
+              }}
+            >
+              {minutes}:{seconds.toString().padStart(2, "0")}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="fixed left-0 right-0 top-[52px] z-40 px-4 py-1">
-        <div className="h-2 w-full overflow-hidden rounded-full bg-white/15">
-          <div
-            className="h-full rounded-full bg-emerald-500 transition-all duration-300"
-            style={{ width: `${progress}%` }}
-          />
+      {/* Progress bar + cell count */}
+      <div className="fixed left-0 right-0 top-[52px] z-40 px-4 py-1.5">
+        <div className="flex items-center gap-3">
+          <div className="relative h-2.5 flex-1 overflow-hidden rounded-full bg-white/[0.08]">
+            <motion.div
+              className="h-full rounded-full"
+              style={{
+                background: "linear-gradient(90deg, #6366f1, #34d399)",
+                boxShadow:
+                  "0 0 12px rgba(99,102,241,0.4), 0 0 24px rgba(52,211,153,0.2)",
+              }}
+              initial={false}
+              animate={{ width: `${progress}%` }}
+              transition={{ duration: 0.3, ease: "easeOut" }}
+            />
+          </div>
+          <span
+            className="min-w-[3rem] text-right text-[11px] font-bold tabular-nums text-white/40"
+            style={{
+              fontFamily:
+                "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
+            }}
+          >
+            {Math.round(progress)}%
+          </span>
+        </div>
+        {/* Cell count + warning */}
+        <div className="mt-1 flex items-center justify-between">
+          <span
+            className={`text-[11px] font-semibold tabular-nums ${
+              overfilled ? "text-amber-400" : "text-white/30"
+            }`}
+          >
+            {playerFilledCount}/{totalFilled} {"\uCC44\uC6C0"}
+          </span>
+          <AnimatePresence>
+            {overfilled && (
+              <motion.span
+                initial={{ opacity: 0, x: 10 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, x: 10 }}
+                className="flex items-center gap-1 text-[11px] font-semibold text-amber-400"
+              >
+                <svg
+                  width="12"
+                  height="12"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2.5"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
+                  <line x1="12" y1="9" x2="12" y2="13" />
+                  <line x1="12" y1="17" x2="12.01" y2="17" />
+                </svg>
+                {"\uCD08\uACFC"}
+              </motion.span>
+            )}
+          </AnimatePresence>
         </div>
       </div>
 
       {/* Main content */}
-      <div className="flex flex-1 flex-col items-center justify-center px-2 pt-20 pb-8">
-        {/* Completion overlay */}
+      <div className="relative flex flex-1 flex-col items-center justify-center px-2 pt-24 pb-8">
+        {/* Completion overlay + confetti */}
         <AnimatePresence>
           {completed && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="pointer-events-none fixed inset-0 z-30 bg-green-500/5"
-            />
+            <>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="pointer-events-none fixed inset-0 z-30"
+                style={{
+                  background:
+                    "radial-gradient(ellipse at center, rgba(251,191,36,0.08) 0%, transparent 70%)",
+                }}
+              />
+              <ConfettiParticles />
+            </>
           )}
         </AnimatePresence>
 
@@ -1043,158 +1337,316 @@ export default function SpatialPuzzleGame({
         <div className="select-none" style={{ touchAction: "none" }}>
           {/* Column hints row */}
           <div className="flex" style={{ marginLeft: hintMaxWidth }}>
-            {hints.colHints.map((hintArr, ci) => (
-              <div
-                key={ci}
-                className="flex flex-col items-center justify-end"
-                style={{
-                  width: cellSize,
-                  height: hintMaxHeight,
-                }}
-              >
-                {hintArr.map((h, hi) => (
-                  <span
-                    key={hi}
-                    className={`text-xs font-semibold leading-tight ${
-                      isColComplete(ci) ? "text-green-400" : "text-white/60"
-                    }`}
-                  >
-                    {h}
-                  </span>
-                ))}
-              </div>
-            ))}
+            {hints.colHints.map((hintArr, ci) => {
+              const colDone = isColComplete(ci);
+              const flashing = flashCols.has(ci);
+              return (
+                <div
+                  key={ci}
+                  className="flex flex-col items-center justify-end"
+                  style={{
+                    width: cellSize,
+                    height: hintMaxHeight,
+                  }}
+                >
+                  {hintArr.map((h, hi) => (
+                    <span
+                      key={hi}
+                      className={`text-xs font-bold leading-tight transition-all duration-300 ${
+                        colDone ? "text-emerald-400" : "text-white/50"
+                      }`}
+                      style={
+                        colDone
+                          ? {
+                              textShadow: flashing
+                                ? "0 0 12px rgba(52,211,153,0.9), 0 0 24px rgba(52,211,153,0.5)"
+                                : "0 0 8px rgba(52,211,153,0.4)",
+                            }
+                          : undefined
+                      }
+                    >
+                      {h}
+                    </span>
+                  ))}
+                </div>
+              );
+            })}
           </div>
 
           {/* Rows */}
-          {Array.from({ length: size }).map((_, ri) => (
-            <div key={ri} className="flex">
-              {/* Row hints */}
-              <div
-                className="flex items-center justify-end gap-1 pr-2"
-                style={{ width: hintMaxWidth }}
-              >
-                {hints.rowHints[ri].map((h, hi) => (
-                  <span
-                    key={hi}
-                    className={`text-xs font-semibold ${
-                      isRowComplete(ri) ? "text-green-400" : "text-white/60"
-                    }`}
-                  >
-                    {h}
-                  </span>
-                ))}
+          {Array.from({ length: size }).map((_, ri) => {
+            const rowDone = isRowComplete(ri);
+            const rowFlashing = flashRows.has(ri);
+            return (
+              <div key={ri} className="flex">
+                {/* Row hints */}
+                <div
+                  className="flex items-center justify-end gap-1 pr-2"
+                  style={{ width: hintMaxWidth }}
+                >
+                  {hints.rowHints[ri].map((h, hi) => (
+                    <span
+                      key={hi}
+                      className={`text-xs font-bold transition-all duration-300 ${
+                        rowDone ? "text-emerald-400" : "text-white/50"
+                      }`}
+                      style={
+                        rowDone
+                          ? {
+                              textShadow: rowFlashing
+                                ? "0 0 12px rgba(52,211,153,0.9), 0 0 24px rgba(52,211,153,0.5)"
+                                : "0 0 8px rgba(52,211,153,0.4)",
+                            }
+                          : undefined
+                      }
+                    >
+                      {h}
+                    </span>
+                  ))}
+                </div>
+
+                {/* Cells */}
+                {Array.from({ length: size }).map((_, ci) => {
+                  const cellVal = playerGrid[ri]?.[ci] ?? 0;
+                  const flatIdx = ri * size + ci;
+                  const isRevealing = completed && revealIdx >= flatIdx;
+                  const isSolutionFilled = selectedPuzzle.grid[ri][ci] === 1;
+                  const cellKey = `${ri}-${ci}`;
+                  const isFlashingRow = flashRows.has(ri);
+                  const isFlashingCol = flashCols.has(ci);
+                  const isFlashing = isFlashingRow || isFlashingCol;
+
+                  // Thicker borders at 5-cell intervals
+                  const thickRight = (ci + 1) % 5 === 0 && ci < size - 1;
+                  const thickBottom = (ri + 1) % 5 === 0 && ri < size - 1;
+
+                  return (
+                    <motion.div
+                      key={cellKey}
+                      animate={
+                        isRevealing && isSolutionFilled
+                          ? {
+                              scale: [1, 1.15, 1],
+                            }
+                          : {}
+                      }
+                      transition={{ duration: 0.3 }}
+                      onPointerDown={(e) => {
+                        e.preventDefault();
+                        handleCellPointerDown(ri, ci);
+                      }}
+                      onPointerEnter={() => handleCellPointerEnter(ri, ci)}
+                      className="relative flex items-center justify-center transition-all duration-150"
+                      style={{
+                        width: cellSize,
+                        height: cellSize,
+                        borderWidth: "1px",
+                        borderColor:
+                          isRevealing && isSolutionFilled
+                            ? "rgba(251,191,36,0.5)"
+                            : isFlashing
+                              ? "rgba(52,211,153,0.3)"
+                              : thickRight || thickBottom
+                                ? "rgba(255,255,255,0.15)"
+                                : "rgba(255,255,255,0.07)",
+                        borderRightWidth: thickRight ? 2.5 : 1,
+                        borderBottomWidth: thickBottom ? 2.5 : 1,
+                        borderRightColor: thickRight
+                          ? "rgba(99,102,241,0.3)"
+                          : undefined,
+                        borderBottomColor: thickBottom
+                          ? "rgba(99,102,241,0.3)"
+                          : undefined,
+                        background:
+                          isRevealing && isSolutionFilled
+                            ? "linear-gradient(135deg, #fbbf24, #f59e0b)"
+                            : cellVal === 1
+                              ? "rgba(255,255,255,0.92)"
+                              : cellVal === 2
+                                ? "rgba(255,255,255,0.02)"
+                                : "rgba(255,255,255,0.03)",
+                        boxShadow:
+                          isRevealing && isSolutionFilled
+                            ? "0 0 16px rgba(251,191,36,0.6), inset 0 0 8px rgba(251,191,36,0.3)"
+                            : cellVal === 1
+                              ? "0 0 8px rgba(255,255,255,0.15), inset 0 1px 2px rgba(255,255,255,0.1)"
+                              : isFlashing
+                                ? "inset 0 0 12px rgba(52,211,153,0.15)"
+                                : "none",
+                      }}
+                    >
+                      {cellVal === 2 && (
+                        <svg
+                          width={cellSize * 0.35}
+                          height={cellSize * 0.35}
+                          viewBox="0 0 12 12"
+                          className="text-white/25"
+                        >
+                          <line
+                            x1="2"
+                            y1="2"
+                            x2="10"
+                            y2="10"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                          />
+                          <line
+                            x1="10"
+                            y1="2"
+                            x2="2"
+                            y2="10"
+                            stroke="currentColor"
+                            strokeWidth="1.5"
+                            strokeLinecap="round"
+                          />
+                        </svg>
+                      )}
+                      <CellRipple active={rippleCell === cellKey} />
+                    </motion.div>
+                  );
+                })}
               </div>
-
-              {/* Cells */}
-              {Array.from({ length: size }).map((_, ci) => {
-                const cellVal = playerGrid[ri]?.[ci] ?? 0;
-                const flatIdx = ri * size + ci;
-                const isRevealing = completed && revealIdx >= flatIdx;
-                const isSolutionFilled = selectedPuzzle.grid[ri][ci] === 1;
-
-                return (
-                  <motion.div
-                    key={`${ri}-${ci}`}
-                    animate={
-                      isRevealing && isSolutionFilled
-                        ? { backgroundColor: "#00B894", scale: [1, 1.1, 1] }
-                        : {}
-                    }
-                    transition={{ duration: 0.2 }}
-                    onPointerDown={(e) => {
-                      e.preventDefault();
-                      handleCellPointerDown(ri, ci);
-                    }}
-                    onPointerEnter={() => handleCellPointerEnter(ri, ci)}
-                    className={`flex items-center justify-center border border-white/10 transition-colors ${
-                      cellVal === 1
-                        ? "bg-white/90"
-                        : cellVal === 2
-                          ? "bg-white/5"
-                          : "bg-white/5 hover:bg-white/10"
-                    }`}
-                    style={{
-                      width: cellSize,
-                      height: cellSize,
-                      borderRightWidth:
-                        (ci + 1) % 5 === 0 && ci < size - 1 ? 2 : undefined,
-                      borderBottomWidth:
-                        (ri + 1) % 5 === 0 && ri < size - 1 ? 2 : undefined,
-                    }}
-                  >
-                    {cellVal === 2 && (
-                      <span className="text-xs font-bold text-white/40">X</span>
-                    )}
-                  </motion.div>
-                );
-              })}
-            </div>
-          ))}
+            );
+          })}
         </div>
 
         {/* Legend */}
-        <div className="mt-6 flex items-center gap-4 text-xs text-white/40">
+        <div className="mt-6 flex items-center gap-5 text-xs text-white/35">
           <div className="flex items-center gap-1.5">
-            <div className="h-4 w-4 rounded border border-white/20 bg-white/90" />
-            <span>채우기</span>
+            <div
+              className="h-4 w-4 rounded-[3px]"
+              style={{
+                background: "rgba(255,255,255,0.9)",
+                boxShadow: "0 0 6px rgba(255,255,255,0.15)",
+              }}
+            />
+            <span className="font-medium">{"\uCC44\uC6B0\uAE30"}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="flex h-4 w-4 items-center justify-center rounded border border-white/20 bg-white/5 text-[8px] font-bold text-white/40">
-              X
+            <div className="flex h-4 w-4 items-center justify-center rounded-[3px] border border-white/10 bg-white/[0.03]">
+              <svg
+                width="8"
+                height="8"
+                viewBox="0 0 12 12"
+                className="text-white/25"
+              >
+                <line
+                  x1="2"
+                  y1="2"
+                  x2="10"
+                  y2="10"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+                <line
+                  x1="10"
+                  y1="2"
+                  x2="2"
+                  y2="10"
+                  stroke="currentColor"
+                  strokeWidth="1.5"
+                  strokeLinecap="round"
+                />
+              </svg>
             </div>
-            <span>빈칸 표시</span>
+            <span className="font-medium">{"\uBE48\uCE78 \uD45C\uC2DC"}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <div className="h-4 w-4 rounded border border-white/20 bg-white/5" />
-            <span>비우기</span>
+            <div className="h-4 w-4 rounded-[3px] border border-white/10 bg-white/[0.03]" />
+            <span className="font-medium">{"\uBE44\uC6B0\uAE30"}</span>
           </div>
         </div>
 
         {/* Reset button */}
         {!completed && (
-          <button
+          <motion.button
             type="button"
-            onClick={() =>
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => {
               setPlayerGrid(
                 Array.from({ length: size }, () => Array(size).fill(0)),
-              )
-            }
-            className="mt-4 rounded-lg bg-white/10 px-4 py-2 text-sm text-white/50 transition-colors hover:bg-white/20"
+              );
+              setCompletedRows(new Set());
+              setCompletedCols(new Set());
+            }}
+            className="mt-5 rounded-xl border border-white/[0.08] bg-white/[0.05] px-5 py-2 text-sm font-semibold text-white/40 backdrop-blur-sm transition-all hover:border-white/[0.15] hover:bg-white/[0.08] hover:text-white/60"
           >
-            초기화
-          </button>
+            {"\uCD08\uAE30\uD654"}
+          </motion.button>
         )}
 
         {/* Completed message */}
         <AnimatePresence>
           {completed && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mt-6 flex flex-col items-center gap-3"
+              initial={{ opacity: 0, y: 30, scale: 0.9 }}
+              animate={{ opacity: 1, y: 0, scale: 1 }}
+              transition={{
+                delay: 0.3,
+                type: "spring",
+                stiffness: 200,
+                damping: 20,
+              }}
+              className="mt-8 flex flex-col items-center gap-4"
             >
-              <span className="text-lg font-bold text-green-400">
-                퍼즐 완성!
-              </span>
-              <span className="text-sm text-white/50">
-                {minutes}분 {seconds}초 소요
+              <motion.span
+                initial={{ scale: 0 }}
+                animate={{ scale: 1 }}
+                transition={{
+                  delay: 0.5,
+                  type: "spring",
+                  stiffness: 300,
+                  damping: 15,
+                }}
+                className="text-2xl font-black tracking-tight"
+                style={{
+                  background:
+                    "linear-gradient(135deg, #fbbf24, #f59e0b, #34d399)",
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                  filter: "drop-shadow(0 0 20px rgba(251,191,36,0.3))",
+                }}
+              >
+                {"\uD37C\uC990 \uC644\uC131!"}
+              </motion.span>
+              <span
+                className="text-sm font-medium text-white/40"
+                style={{
+                  fontFamily:
+                    "ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace",
+                }}
+              >
+                {minutes}
+                {"\uBD84"} {seconds}
+                {"\uCD08 \uC18C\uC694"}
               </span>
               <div className="flex gap-3">
-                <button
+                <motion.button
                   type="button"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={() => setSelectedPuzzle(null)}
-                  className="rounded-xl bg-emerald-500 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-emerald-400"
+                  className="rounded-xl px-6 py-2.5 text-sm font-bold text-white transition-all"
+                  style={{
+                    background: "linear-gradient(135deg, #6366f1, #34d399)",
+                    boxShadow:
+                      "0 0 20px rgba(99,102,241,0.3), 0 4px 12px rgba(0,0,0,0.3)",
+                  }}
                 >
-                  다른 퍼즐
-                </button>
-                <button
+                  {"\uB2E4\uB978 \uD37C\uC990"}
+                </motion.button>
+                <motion.button
                   type="button"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={onBack}
-                  className="rounded-xl bg-white/10 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-white/20"
+                  className="rounded-xl border border-white/[0.1] bg-white/[0.06] px-6 py-2.5 text-sm font-bold text-white/70 backdrop-blur-sm transition-all hover:bg-white/[0.1]"
                 >
-                  나가기
-                </button>
+                  {"\uB098\uAC00\uAE30"}
+                </motion.button>
               </div>
             </motion.div>
           )}
@@ -1202,135 +1654,151 @@ export default function SpatialPuzzleGame({
       </div>
 
       {/* Tutorial Modal */}
-      <AnimatePresence>
-        {showTutorial && (
+      <TutorialModal
+        show={showTutorial}
+        onClose={() => setShowTutorial(false)}
+      />
+    </div>
+  );
+}
+
+// Extracted tutorial modal to keep it unchanged in content but consistent rendering
+function TutorialModal({
+  show,
+  onClose,
+}: {
+  show: boolean;
+  onClose: () => void;
+}) {
+  return (
+    <AnimatePresence>
+      {show && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
+          onClick={onClose}
+        >
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 px-4"
-            onClick={() => setShowTutorial(false)}
+            initial={{ scale: 0.9, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.9, opacity: 0 }}
+            onClick={(e) => e.stopPropagation()}
+            className="w-full max-w-sm rounded-2xl bg-slate-800 p-5 shadow-2xl"
           >
-            <motion.div
-              initial={{ scale: 0.9, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              exit={{ scale: 0.9, opacity: 0 }}
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-sm rounded-2xl bg-slate-800 p-5 shadow-2xl"
-            >
-              <h2 className="mb-4 text-center text-lg font-bold text-white">
-                노노그램 플레이 방법
-              </h2>
+            <h2 className="mb-4 text-center text-lg font-bold text-white">
+              노노그램 플레이 방법
+            </h2>
 
-              <div className="space-y-4 text-sm text-white/80">
-                <div>
-                  <p className="mb-2 font-semibold text-indigo-300">목표</p>
-                  <p>숫자 힌트를 보고 칸을 채워서 숨겨진 그림을 완성하세요!</p>
-                </div>
+            <div className="space-y-4 text-sm text-white/80">
+              <div>
+                <p className="mb-2 font-semibold text-indigo-300">목표</p>
+                <p>숫자 힌트를 보고 칸을 채워서 숨겨진 그림을 완성하세요!</p>
+              </div>
 
-                <div>
-                  <p className="mb-2 font-semibold text-indigo-300">
-                    숫자 힌트 읽는 법
-                  </p>
-                  <p className="mb-1">
-                    각 행/열 옆의 숫자는{" "}
-                    <span className="font-bold text-white">
-                      연속으로 채워야 할 칸의 수
+              <div>
+                <p className="mb-2 font-semibold text-indigo-300">
+                  숫자 힌트 읽는 법
+                </p>
+                <p className="mb-1">
+                  각 행/열 옆의 숫자는{" "}
+                  <span className="font-bold text-white">
+                    연속으로 채워야 할 칸의 수
+                  </span>
+                  를 의미합니다.
+                </p>
+                <div className="mt-2 rounded-lg bg-slate-700/60 p-3">
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="shrink-0 text-xs font-bold text-yellow-300 w-8 text-right">
+                      3
                     </span>
-                    를 의미합니다.
-                  </p>
-                  <div className="mt-2 rounded-lg bg-slate-700/60 p-3">
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="shrink-0 text-xs font-bold text-yellow-300 w-8 text-right">
-                        3
-                      </span>
-                      <div className="flex gap-0.5">
-                        <div className="h-5 w-5 rounded-sm bg-white/90" />
-                        <div className="h-5 w-5 rounded-sm bg-white/90" />
-                        <div className="h-5 w-5 rounded-sm bg-white/90" />
-                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
-                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
-                      </div>
-                      <span className="text-xs text-white/40">= 3칸 연속</span>
+                    <div className="flex gap-0.5">
+                      <div className="h-5 w-5 rounded-sm bg-white/90" />
+                      <div className="h-5 w-5 rounded-sm bg-white/90" />
+                      <div className="h-5 w-5 rounded-sm bg-white/90" />
+                      <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                      <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
                     </div>
-                    <div className="flex items-center gap-2 mb-2">
-                      <span className="shrink-0 text-xs font-bold text-yellow-300 w-8 text-right">
-                        1 2
-                      </span>
-                      <div className="flex gap-0.5">
-                        <div className="h-5 w-5 rounded-sm bg-white/90" />
-                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
-                        <div className="h-5 w-5 rounded-sm bg-white/90" />
-                        <div className="h-5 w-5 rounded-sm bg-white/90" />
-                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
-                      </div>
-                      <span className="text-xs text-white/40">
-                        = 1칸 + 빈칸 + 2칸
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="shrink-0 text-xs font-bold text-green-400 w-8 text-right">
-                        0
-                      </span>
-                      <div className="flex gap-0.5">
-                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
-                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
-                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
-                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
-                        <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
-                      </div>
-                      <span className="text-xs text-white/40">= 전부 빈칸</span>
-                    </div>
+                    <span className="text-xs text-white/40">= 3칸 연속</span>
                   </div>
-                </div>
-
-                <div>
-                  <p className="mb-2 font-semibold text-indigo-300">조작법</p>
-                  <div className="space-y-1.5">
-                    <div className="flex items-center gap-2">
-                      <span className="text-white/50">1번 탭:</span>
-                      <div className="h-4 w-4 rounded-sm bg-white/90" />
-                      <span>채우기</span>
+                  <div className="flex items-center gap-2 mb-2">
+                    <span className="shrink-0 text-xs font-bold text-yellow-300 w-8 text-right">
+                      1 2
+                    </span>
+                    <div className="flex gap-0.5">
+                      <div className="h-5 w-5 rounded-sm bg-white/90" />
+                      <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                      <div className="h-5 w-5 rounded-sm bg-white/90" />
+                      <div className="h-5 w-5 rounded-sm bg-white/90" />
+                      <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
                     </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-white/50">2번 탭:</span>
-                      <div className="flex h-4 w-4 items-center justify-center rounded-sm border border-white/20 bg-white/5 text-[8px] font-bold text-white/40">
-                        X
-                      </div>
-                      <span>빈칸 확정 (메모용)</span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <span className="text-white/50">3번 탭:</span>
-                      <div className="h-4 w-4 rounded-sm border border-white/20 bg-white/5" />
-                      <span>원래대로</span>
-                    </div>
+                    <span className="text-xs text-white/40">
+                      = 1칸 + 빈칸 + 2칸
+                    </span>
                   </div>
-                </div>
-
-                <div>
-                  <p className="mb-1 font-semibold text-indigo-300">팁</p>
-                  <ul className="list-disc pl-4 space-y-1 text-white/60">
-                    <li>
-                      <span className="text-green-400">초록색</span> 숫자 = 해당
-                      줄 완성!
-                    </li>
-                    <li>드래그해서 여러 칸을 한번에 채울 수 있어요</li>
-                    <li>먼저 5x5 쉬운 퍼즐부터 시작해보세요</li>
-                  </ul>
+                  <div className="flex items-center gap-2">
+                    <span className="shrink-0 text-xs font-bold text-green-400 w-8 text-right">
+                      0
+                    </span>
+                    <div className="flex gap-0.5">
+                      <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                      <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                      <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                      <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                      <div className="h-5 w-5 rounded-sm border border-white/20 bg-white/5" />
+                    </div>
+                    <span className="text-xs text-white/40">= 전부 빈칸</span>
+                  </div>
                 </div>
               </div>
 
-              <button
-                type="button"
-                onClick={() => setShowTutorial(false)}
-                className="mt-5 w-full rounded-xl bg-indigo-500 py-3 text-sm font-bold text-white transition-colors hover:bg-indigo-400"
-              >
-                알겠어요!
-              </button>
-            </motion.div>
+              <div>
+                <p className="mb-2 font-semibold text-indigo-300">조작법</p>
+                <div className="space-y-1.5">
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/50">1번 탭:</span>
+                    <div className="h-4 w-4 rounded-sm bg-white/90" />
+                    <span>채우기</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/50">2번 탭:</span>
+                    <div className="flex h-4 w-4 items-center justify-center rounded-sm border border-white/20 bg-white/5 text-[8px] font-bold text-white/40">
+                      X
+                    </div>
+                    <span>빈칸 확정 (메모용)</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="text-white/50">3번 탭:</span>
+                    <div className="h-4 w-4 rounded-sm border border-white/20 bg-white/5" />
+                    <span>원래대로</span>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <p className="mb-1 font-semibold text-indigo-300">팁</p>
+                <ul className="list-disc pl-4 space-y-1 text-white/60">
+                  <li>
+                    <span className="text-green-400">초록색</span> 숫자 = 해당
+                    줄 완성!
+                  </li>
+                  <li>드래그해서 여러 칸을 한번에 채울 수 있어요</li>
+                  <li>먼저 5x5 쉬운 퍼즐부터 시작해보세요</li>
+                </ul>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              className="mt-5 w-full rounded-xl bg-indigo-500 py-3 text-sm font-bold text-white transition-colors hover:bg-indigo-400"
+            >
+              알겠어요!
+            </button>
           </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }
