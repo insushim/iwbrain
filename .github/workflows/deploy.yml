@@ -32,7 +32,9 @@ jobs:
           java-version: 17
       - uses: android-actions/setup-android@v3
       - uses: gradle/actions/setup-gradle@v4
-      - run: chmod +x ./gradlew && ./gradlew assembleRelease
+        with:
+          gradle-version: '8.11.1'
+      - run: gradle assembleRelease
         working-directory: android
       - uses: softprops/action-gh-release@v2
         with:
