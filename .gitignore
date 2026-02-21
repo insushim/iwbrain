@@ -32,9 +32,22 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+.dev.vars
 
 # vercel
 .vercel
+
+# cloudflare
+.open-next/
+.wrangler/
+
+# android
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+*.apk
+*.aab
 
 # typescript
 *.tsbuildinfo
