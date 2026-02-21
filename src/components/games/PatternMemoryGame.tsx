@@ -2,6 +2,9 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useCallback, useEffect, useRef } from "react";
+import { SoundEffects, setVolume, setMuted } from "@/lib/sound";
+import { Haptic, setHapticEnabled } from "@/lib/haptic";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 interface PatternMemoryGameProps {
   difficulty: "easy" | "medium" | "hard" | "extreme";
@@ -55,6 +58,14 @@ export default function PatternMemoryGame({
 }: PatternMemoryGameProps) {
   const gridSize = GRID_SIZES[difficulty];
   const totalCells = gridSize * gridSize;
+  const { settings } = useSettingsStore();
+
+  // Sync sound/haptic settings
+  useEffect(() => {
+    setVolume(settings.soundVolume / 100);
+    setMuted(!settings.soundEnabled);
+    setHapticEnabled(settings.vibrationEnabled);
+  }, [settings.soundVolume, settings.soundEnabled, settings.vibrationEnabled]);
 
   const [sequence, setSequence] = useState<number[]>([]);
   const [colorSequence, setColorSequence] = useState<number[]>([]);
@@ -215,6 +226,8 @@ export default function PatternMemoryGame({
       if (newMode !== prevMode && roundNum > 1) {
         const announcement = getModeAnnouncement(newMode);
         setModeAnnouncement(announcement);
+        SoundEffects.levelUp();
+        Haptic.achievement();
         announcementTimerRef.current = setTimeout(() => {
           setModeAnnouncement(null);
           playSequence(seq, colors, newMode);
@@ -237,6 +250,9 @@ export default function PatternMemoryGame({
     (cellIndex: number) => {
       if (phase !== "input") return;
 
+      SoundEffects.click();
+      Haptic.button();
+
       const expected = getExpectedInput();
       const newInput = [...inputSequence, cellIndex];
       setInputSequence(newInput);
@@ -244,6 +260,8 @@ export default function PatternMemoryGame({
       const currentIndex = newInput.length - 1;
 
       if (newInput[currentIndex] !== expected[currentIndex]) {
+        SoundEffects.wrong();
+        Haptic.wrong();
         setFeedbackType("wrong");
         setPhase("feedback");
 
@@ -251,6 +269,7 @@ export default function PatternMemoryGame({
         setLives(newLives);
 
         if (newLives <= 0) {
+          SoundEffects.gameOver();
           feedbackTimerRef.current = setTimeout(() => {
             setPhase("gameover");
             onComplete(score, {
@@ -276,6 +295,8 @@ export default function PatternMemoryGame({
         const newScore = score + roundScore;
         setScore(newScore);
         setMaxSequence(Math.max(maxSequence, seqLen));
+        SoundEffects.correct();
+        Haptic.correct();
         setFeedbackType("correct");
         setPhase("feedback");
 

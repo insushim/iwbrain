@@ -8,6 +8,9 @@ import {
   getWordsStartingWith,
   isValidWord,
 } from "@/data/words-ko";
+import { SoundEffects, setVolume, setMuted } from "@/lib/sound";
+import { Haptic, setHapticEnabled } from "@/lib/haptic";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 interface WordChainGameProps {
   onComplete: (score: number, details: Record<string, unknown>) => void;
@@ -48,6 +51,15 @@ export default function WordChainGame({
   onComplete,
   onBack,
 }: WordChainGameProps) {
+  const { settings } = useSettingsStore();
+
+  // Sync sound/haptic settings
+  useEffect(() => {
+    setVolume(settings.soundVolume / 100);
+    setMuted(!settings.soundEnabled);
+    setHapticEnabled(settings.vibrationEnabled);
+  }, [settings.soundVolume, settings.soundEnabled, settings.vibrationEnabled]);
+
   const [phase, setPhase] = useState<"ready" | "playing" | "over">("ready");
   const [currentWord, setCurrentWord] = useState("");
   const [inputValue, setInputValue] = useState("");
@@ -72,6 +84,8 @@ export default function WordChainGame({
   const endGame = useCallback(() => {
     setPhase("over");
     clearInterval(timerRef.current);
+    SoundEffects.gameOver();
+    Haptic.wrong();
   }, []);
 
   const startGame = useCallback(() => {
@@ -133,6 +147,8 @@ export default function WordChainGame({
 
       // Validate starts with correct char
       if (firstChar !== requiredChar && firstChar !== dueumChar) {
+        SoundEffects.wrong();
+        Haptic.wrong();
         setShaking(true);
         setTimeout(() => setShaking(false), 400);
         setErrorMsg(`'${requiredChar}'(으)로 시작해야 해요`);
@@ -143,6 +159,8 @@ export default function WordChainGame({
 
       // Validate word exists
       if (!isValidWord(word)) {
+        SoundEffects.wrong();
+        Haptic.wrong();
         setShaking(true);
         setTimeout(() => setShaking(false), 400);
         setErrorMsg("없는 단어예요");
@@ -153,6 +171,8 @@ export default function WordChainGame({
 
       // Validate not used
       if (usedWords.has(word)) {
+        SoundEffects.wrong();
+        Haptic.wrong();
         setShaking(true);
         setTimeout(() => setShaking(false), 400);
         setErrorMsg("이미 사용한 단어예요");
@@ -173,6 +193,14 @@ export default function WordChainGame({
       setStreak(newStreak);
       setMaxStreak((m) => Math.max(m, newStreak));
       setInputValue("");
+
+      if (newStreak > 2) {
+        SoundEffects.combo(newStreak);
+        Haptic.combo();
+      } else {
+        SoundEffects.correct();
+        Haptic.correct();
+      }
 
       // Bonus time for 5 consecutive
       if (newStreak > 0 && newStreak % 5 === 0) {

@@ -17,6 +17,7 @@ export default function SettingsPage() {
   } = useSettingsStore();
   const [showResetModal, setShowResetModal] = useState(false);
   const [showInstallGuide, setShowInstallGuide] = useState(false);
+  const [showLicenses, setShowLicenses] = useState(false);
 
   useEffect(() => {
     init();
@@ -135,6 +136,31 @@ export default function SettingsPage() {
           </button>
 
           <button
+            onClick={() => setShowLicenses(true)}
+            className="w-full flex items-center justify-between p-4 text-left"
+          >
+            <div>
+              <p className="font-medium">오픈소스 라이선스</p>
+              <p className="text-sm text-[var(--text-secondary)]">
+                사용된 오픈소스 소프트웨어
+              </p>
+            </div>
+            <svg
+              className="w-5 h-5 text-[var(--text-muted)]"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth={2}
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                d="M9 5l7 7-7 7"
+              />
+            </svg>
+          </button>
+
+          <button
             onClick={() => setShowResetModal(true)}
             className="w-full flex items-center justify-between p-4 text-left"
           >
@@ -188,6 +214,59 @@ export default function SettingsPage() {
           >
             초기화
           </button>
+        </div>
+      </Modal>
+
+      <Modal
+        isOpen={showLicenses}
+        onClose={() => setShowLicenses(false)}
+        title="오픈소스 라이선스"
+      >
+        <div className="text-sm text-[var(--text-secondary)] space-y-3 max-h-80 overflow-y-auto">
+          {[
+            { name: "React", license: "MIT", author: "Meta Platforms, Inc." },
+            { name: "Next.js", license: "MIT", author: "Vercel, Inc." },
+            { name: "Framer Motion", license: "MIT", author: "Framer B.V." },
+            { name: "Zustand", license: "MIT", author: "Paul Henschel" },
+            {
+              name: "Tailwind CSS",
+              license: "MIT",
+              author: "Tailwind Labs, Inc.",
+            },
+            { name: "date-fns", license: "MIT", author: "Sasha Koss" },
+            { name: "canvas-confetti", license: "ISC", author: "Kiril Vatev" },
+            {
+              name: "Pretendard",
+              license: "SIL OFL 1.1",
+              author: "Kil Hyung-jin",
+            },
+            { name: "TypeScript", license: "Apache-2.0", author: "Microsoft" },
+            { name: "sharp", license: "Apache-2.0", author: "Lovell Fuller" },
+            {
+              name: "OpenNext Cloudflare",
+              license: "MIT",
+              author: "OpenNext Contributors",
+            },
+          ].map((lib) => (
+            <div
+              key={lib.name}
+              className="flex items-center justify-between py-1.5"
+            >
+              <div>
+                <p className="font-medium text-[var(--text-primary)]">
+                  {lib.name}
+                </p>
+                <p className="text-xs">{lib.author}</p>
+              </div>
+              <span className="text-xs px-2 py-0.5 rounded bg-black/5 dark:bg-white/10 shrink-0">
+                {lib.license}
+              </span>
+            </div>
+          ))}
+          <p className="text-xs text-[var(--text-muted)] pt-2 border-t border-[var(--border)]">
+            이 앱은 위 오픈소스 소프트웨어를 사용하여 제작되었습니다. 각
+            라이선스의 전문은 해당 프로젝트의 저장소에서 확인할 수 있습니다.
+          </p>
         </div>
       </Modal>
 

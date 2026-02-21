@@ -2,6 +2,9 @@
 
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
+import { SoundEffects, setVolume, setMuted } from "@/lib/sound";
+import { Haptic, setHapticEnabled } from "@/lib/haptic";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 interface MathRushGameProps {
   onComplete: (score: number, details: Record<string, unknown>) => void;
@@ -131,6 +134,15 @@ export default function MathRushGame({
   onComplete,
   onBack,
 }: MathRushGameProps) {
+  const { settings } = useSettingsStore();
+
+  // Sync sound/haptic settings
+  useEffect(() => {
+    setVolume(settings.soundVolume / 100);
+    setMuted(!settings.soundEnabled);
+    setHapticEnabled(settings.vibrationEnabled);
+  }, [settings.soundVolume, settings.soundEnabled, settings.vibrationEnabled]);
+
   const [phase, setPhase] = useState<"ready" | "playing" | "over">("ready");
   const [timeLeft, setTimeLeft] = useState(60);
   const [score, setScore] = useState(0);
@@ -167,6 +179,8 @@ export default function MathRushGame({
   const endGame = useCallback(() => {
     setPhase("over");
     clearInterval(timerRef.current);
+    SoundEffects.gameOver();
+    Haptic.wrong();
   }, []);
 
   const startGame = useCallback(() => {
@@ -227,6 +241,8 @@ export default function MathRushGame({
           setLevel(newLevel);
           setConsecutiveCorrect(0);
           setLevelMsg("Level Up!");
+          SoundEffects.levelUp();
+          Haptic.achievement();
           clearTimeout(levelTimeout.current);
           levelTimeout.current = setTimeout(() => setLevelMsg(""), 1200);
           setFeedback("correct");
@@ -236,6 +252,13 @@ export default function MathRushGame({
             loadNewProblem(newLevel);
           }, 400);
         } else {
+          if (newCombo > 2) {
+            SoundEffects.combo(newCombo);
+            Haptic.combo();
+          } else {
+            SoundEffects.correct();
+            Haptic.correct();
+          }
           setFeedback("correct");
           clearTimeout(feedbackTimeout.current);
           feedbackTimeout.current = setTimeout(() => {
@@ -245,6 +268,8 @@ export default function MathRushGame({
         }
       } else {
         setCombo(0);
+        SoundEffects.wrong();
+        Haptic.wrong();
         setTotalWrong((w) => w + 1);
         setConsecutiveCorrect(0);
         setShaking(true);

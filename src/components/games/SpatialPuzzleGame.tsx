@@ -3,6 +3,10 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { calculateNonogramHints } from "@/utils/grid";
+import { generatePuzzle } from "@/utils/nonogramGenerator";
+import { SoundEffects, setVolume, setMuted } from "@/lib/sound";
+import { Haptic, setHapticEnabled } from "@/lib/haptic";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 interface SpatialPuzzleGameProps {
   puzzleId?: string;
@@ -147,6 +151,71 @@ const PUZZLES: PuzzleData[] = [
       [0, 0, 1, 0, 0],
       [0, 0, 1, 0, 0],
       [0, 1, 1, 0, 0],
+      [0, 1, 1, 0, 0],
+    ],
+  },
+  {
+    id: "diamond",
+    name: "Diamond",
+    emoji: "💎",
+    size: 5,
+    grid: [
+      [0, 0, 1, 0, 0],
+      [0, 1, 0, 1, 0],
+      [1, 0, 0, 0, 1],
+      [0, 1, 0, 1, 0],
+      [0, 0, 1, 0, 0],
+    ],
+  },
+  {
+    id: "cup",
+    name: "Cup",
+    emoji: "☕",
+    size: 5,
+    grid: [
+      [1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1],
+      [0, 1, 1, 1, 0],
+      [0, 0, 1, 0, 0],
+      [0, 1, 1, 1, 0],
+    ],
+  },
+  {
+    id: "lightning",
+    name: "Lightning",
+    emoji: "⚡",
+    size: 5,
+    grid: [
+      [0, 0, 1, 1, 0],
+      [0, 1, 1, 0, 0],
+      [1, 1, 1, 1, 0],
+      [0, 0, 1, 1, 0],
+      [0, 1, 1, 0, 0],
+    ],
+  },
+  {
+    id: "cross",
+    name: "Cross",
+    emoji: "✚",
+    size: 5,
+    grid: [
+      [0, 1, 1, 1, 0],
+      [0, 0, 1, 0, 0],
+      [1, 1, 1, 1, 1],
+      [0, 0, 1, 0, 0],
+      [0, 1, 1, 1, 0],
+    ],
+  },
+  {
+    id: "moon",
+    name: "Moon",
+    emoji: "🌙",
+    size: 5,
+    grid: [
+      [0, 1, 1, 0, 0],
+      [1, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0],
+      [1, 0, 0, 0, 0],
       [0, 1, 1, 0, 0],
     ],
   },
@@ -301,6 +370,81 @@ const PUZZLES: PuzzleData[] = [
       [0, 0, 0, 0, 0, 0, 0],
     ],
   },
+  {
+    id: "penguin",
+    name: "Penguin",
+    emoji: "🐧",
+    size: 7,
+    grid: [
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 0, 1, 0, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 1, 1, 0, 1, 1, 0],
+    ],
+  },
+  {
+    id: "anchor",
+    name: "Anchor",
+    emoji: "⚓",
+    size: 7,
+    grid: [
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 1, 0, 0, 0],
+      [1, 0, 0, 1, 0, 0, 1],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 0, 1, 1, 1, 0, 0],
+    ],
+  },
+  {
+    id: "ghost",
+    name: "Ghost",
+    emoji: "👻",
+    size: 7,
+    grid: [
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 0, 1, 0, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 0, 1, 0, 1, 0],
+    ],
+  },
+  {
+    id: "rocket",
+    name: "Rocket",
+    emoji: "🚀",
+    size: 7,
+    grid: [
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 1, 0, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 0, 1, 0, 1, 0, 0],
+      [0, 1, 0, 0, 0, 1, 0],
+    ],
+  },
+  {
+    id: "cactus",
+    name: "Cactus",
+    emoji: "🌵",
+    size: 7,
+    grid: [
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 1, 0, 1, 0, 1, 0],
+      [0, 1, 0, 1, 0, 1, 0],
+      [0, 1, 1, 1, 1, 1, 0],
+      [0, 0, 0, 1, 0, 0, 0],
+      [0, 0, 1, 1, 1, 0, 0],
+    ],
+  },
   // 10x10 Puzzles
   {
     id: "spaceship",
@@ -392,6 +536,96 @@ const PUZZLES: PuzzleData[] = [
       [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
     ],
   },
+  {
+    id: "lighthouse",
+    name: "Lighthouse",
+    emoji: "🗼",
+    size: 10,
+    grid: [
+      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+      [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+    ],
+  },
+  {
+    id: "camera",
+    name: "Camera",
+    emoji: "📷",
+    size: 10,
+    grid: [
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+      [0, 0, 0, 1, 1, 1, 0, 0, 0, 0],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 0, 1, 1, 1, 1, 0, 1, 1],
+      [1, 1, 0, 1, 0, 0, 1, 0, 1, 1],
+      [1, 1, 0, 1, 1, 1, 1, 0, 1, 1],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ],
+  },
+  {
+    id: "treasure",
+    name: "Treasure",
+    emoji: "🏆",
+    size: 10,
+    grid: [
+      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 1, 0, 0, 0, 0, 1, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+    ],
+  },
+  {
+    id: "skull10",
+    name: "Pirate",
+    emoji: "☠️",
+    size: 10,
+    grid: [
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [1, 1, 1, 1, 1, 1, 1, 1, 1, 1],
+      [1, 1, 0, 0, 1, 1, 0, 0, 1, 1],
+      [1, 1, 0, 0, 1, 1, 0, 0, 1, 1],
+      [1, 1, 1, 1, 0, 0, 1, 1, 1, 1],
+      [0, 1, 1, 0, 1, 1, 0, 1, 1, 0],
+      [0, 0, 1, 1, 0, 0, 1, 1, 0, 0],
+      [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+      [0, 0, 0, 0, 1, 1, 0, 0, 0, 0],
+    ],
+  },
+  {
+    id: "alien",
+    name: "Alien",
+    emoji: "👾",
+    size: 10,
+    grid: [
+      [0, 0, 0, 1, 1, 1, 1, 0, 0, 0],
+      [0, 0, 1, 1, 1, 1, 1, 1, 0, 0],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [0, 1, 0, 0, 1, 1, 0, 0, 1, 0],
+      [0, 1, 1, 1, 1, 1, 1, 1, 1, 0],
+      [0, 0, 0, 1, 0, 0, 1, 0, 0, 0],
+      [0, 0, 1, 0, 1, 1, 0, 1, 0, 0],
+      [0, 1, 0, 1, 0, 0, 1, 0, 1, 0],
+      [0, 1, 0, 0, 0, 0, 0, 0, 1, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    ],
+  },
 ];
 
 const SIZE_GROUPS = [
@@ -405,6 +639,15 @@ export default function SpatialPuzzleGame({
   onComplete,
   onBack,
 }: SpatialPuzzleGameProps) {
+  const { settings } = useSettingsStore();
+
+  // Sync sound/haptic settings
+  useEffect(() => {
+    setVolume(settings.soundVolume / 100);
+    setMuted(!settings.soundEnabled);
+    setHapticEnabled(settings.vibrationEnabled);
+  }, [settings.soundVolume, settings.soundEnabled, settings.vibrationEnabled]);
+
   const [selectedPuzzle, setSelectedPuzzle] = useState<PuzzleData | null>(
     () => {
       if (puzzleId) {
@@ -505,6 +748,8 @@ export default function SpatialPuzzleGame({
     }
     // Completed!
     setCompleted(true);
+    SoundEffects.achievement();
+    Haptic.achievement();
     clearInterval(elapsedRef.current);
     const timeTaken = Math.floor((Date.now() - startTime) / 1000);
     const sizeBonus = selectedPuzzle.size * 100;
@@ -550,6 +795,8 @@ export default function SpatialPuzzleGame({
   const handleCellPointerDown = useCallback(
     (row: number, col: number) => {
       if (completed || !selectedPuzzle) return;
+      SoundEffects.click();
+      Haptic.button();
       setIsDragging(true);
       const currentVal = playerGrid[row]?.[col] ?? 0;
       const nextVal = (currentVal + 1) % 3;
@@ -579,6 +826,14 @@ export default function SpatialPuzzleGame({
     setIsDragging(false);
     setDragMode(null);
   }, []);
+
+  const handleRandomPuzzle = useCallback(
+    (size: number) => {
+      const puzzle = generatePuzzle(size);
+      startPuzzle(puzzle);
+    },
+    [startPuzzle],
+  );
 
   // Puzzle selection screen
   if (!selectedPuzzle) {
@@ -611,9 +866,35 @@ export default function SpatialPuzzleGame({
         <div className="flex flex-1 flex-col gap-6 px-4 pt-16 pb-8">
           {SIZE_GROUPS.map((group) => (
             <div key={group.size}>
-              <h2 className="mb-3 text-sm font-semibold text-white/50">
-                {group.label}
-              </h2>
+              <div className="mb-3 flex items-center justify-between">
+                <h2 className="text-sm font-semibold text-white/50">
+                  {group.label}
+                </h2>
+                <motion.button
+                  type="button"
+                  whileTap={{ scale: 0.95 }}
+                  onClick={() => handleRandomPuzzle(group.size)}
+                  className="flex items-center gap-1.5 rounded-lg bg-indigo-500/20 px-3 py-1.5 text-xs font-semibold text-indigo-300 transition-colors hover:bg-indigo-500/30"
+                >
+                  <svg
+                    width="14"
+                    height="14"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <polyline points="16 3 21 3 21 8" />
+                    <line x1="4" y1="20" x2="21" y2="3" />
+                    <polyline points="21 16 21 21 16 21" />
+                    <line x1="15" y1="15" x2="21" y2="21" />
+                    <line x1="4" y1="4" x2="9" y2="9" />
+                  </svg>
+                  랜덤
+                </motion.button>
+              </div>
               <div className="grid grid-cols-5 gap-2">
                 {PUZZLES.filter((p) => p.size === group.size).map((puzzle) => (
                   <motion.button

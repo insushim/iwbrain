@@ -2,6 +2,9 @@
 
 import { motion, AnimatePresence } from "framer-motion";
 import { useState, useEffect, useCallback, useRef } from "react";
+import { SoundEffects, setVolume, setMuted } from "@/lib/sound";
+import { Haptic, setHapticEnabled } from "@/lib/haptic";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 interface NumberLogicGameProps {
   difficulty: "easy" | "medium" | "hard" | "extreme";
@@ -355,6 +358,14 @@ export default function NumberLogicGame({
   onBack,
 }: NumberLogicGameProps) {
   const n = GRID_SIZES[difficulty];
+  const { settings } = useSettingsStore();
+
+  // Sync sound/haptic settings
+  useEffect(() => {
+    setVolume(settings.soundVolume / 100);
+    setMuted(!settings.soundEnabled);
+    setHapticEnabled(settings.vibrationEnabled);
+  }, [settings.soundVolume, settings.soundEnabled, settings.vibrationEnabled]);
 
   const [puzzle, setPuzzle] = useState<{
     solution: number[][];
@@ -451,6 +462,8 @@ export default function NumberLogicGame({
       // Completed!
       completedRef.current = true;
       setCompleted(true);
+      SoundEffects.achievement();
+      Haptic.achievement();
 
       // Wave animation
       const allCells: string[] = [];
@@ -500,6 +513,8 @@ export default function NumberLogicGame({
   const handleCellTap = (r: number, c: number) => {
     if (completed) return;
     if (puzzle && puzzle.revealed[r][c] !== 0) return; // Can't select revealed cells
+    SoundEffects.click();
+    Haptic.button();
     if (selectedCell && selectedCell[0] === r && selectedCell[1] === c) {
       setSelectedCell(null);
     } else {
@@ -556,6 +571,8 @@ export default function NumberLogicGame({
     if (puzzle.revealed[r][c] !== 0) return;
     if (userGrid[r][c] === puzzle.solution[r][c]) return;
 
+    SoundEffects.hint();
+    Haptic.correct();
     setUserGrid((prev) => {
       const next = prev.map((row) => [...row]);
       next[r][c] = puzzle.solution[r][c];

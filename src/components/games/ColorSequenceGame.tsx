@@ -3,6 +3,9 @@
 import { useState, useEffect, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { STROOP_COLORS } from "@/utils/color";
+import { SoundEffects, setVolume, setMuted } from "@/lib/sound";
+import { Haptic, setHapticEnabled } from "@/lib/haptic";
+import { useSettingsStore } from "@/stores/settingsStore";
 
 interface ColorSequenceGameProps {
   difficulty: "easy" | "medium" | "hard" | "extreme";
@@ -49,6 +52,14 @@ export default function ColorSequenceGame({
 }: ColorSequenceGameProps) {
   const config = DIFFICULTY_CONFIG[difficulty];
   const colorsInPlay = STROOP_COLORS.slice(0, config.colorCount);
+  const { settings } = useSettingsStore();
+
+  // Sync sound/haptic settings
+  useEffect(() => {
+    setVolume(settings.soundVolume / 100);
+    setMuted(!settings.soundEnabled);
+    setHapticEnabled(settings.vibrationEnabled);
+  }, [settings.soundVolume, settings.soundEnabled, settings.vibrationEnabled]);
 
   const [phase, setPhase] = useState<"ready" | "playing" | "over">("ready");
   const [score, setScore] = useState(0);
@@ -79,6 +90,8 @@ export default function ColorSequenceGame({
     setPhase("over");
     clearInterval(gameTimerRef.current);
     clearInterval(qTimerRef.current);
+    SoundEffects.gameOver();
+    Haptic.wrong();
   }, []);
 
   const nextQuestion = useCallback(
@@ -135,8 +148,18 @@ export default function ColorSequenceGame({
     if (phase !== "playing") return;
     qTimerRef.current = setInterval(() => {
       setQuestionTime((prev) => {
+        // Tick sound on each whole second
+        const prevSec = Math.ceil(prev);
+        const nextVal = Math.max(0, prev - 0.1);
+        const nextSec = Math.ceil(nextVal);
+        if (prevSec !== nextSec && nextSec > 0 && nextSec <= 3) {
+          SoundEffects.tick();
+          Haptic.tick();
+        }
         if (prev <= 0.1) {
           // Time up for this question = wrong
+          SoundEffects.wrong();
+          Haptic.wrong();
           setLives((l) => {
             const newLives = l - 1;
             if (newLives <= 0) endGame();
@@ -179,6 +202,13 @@ export default function ColorSequenceGame({
         const points = Math.round(10 * (1 + newStreak / 10));
         setScore((s) => s + points);
         setScorePopup(points);
+        if (newStreak > 2) {
+          SoundEffects.combo(newStreak);
+          Haptic.combo();
+        } else {
+          SoundEffects.correct();
+          Haptic.correct();
+        }
         setFeedback("correct");
         clearTimeout(feedbackTimeout.current);
         feedbackTimeout.current = setTimeout(() => {
@@ -188,6 +218,8 @@ export default function ColorSequenceGame({
         nextQuestion(newTotal, instruction);
       } else {
         setStreak(0);
+        SoundEffects.wrong();
+        Haptic.wrong();
         setLives((l) => {
           const newLives = l - 1;
           if (newLives <= 0) endGame();
