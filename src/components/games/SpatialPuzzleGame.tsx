@@ -4,6 +4,7 @@ import { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { calculateNonogramHints } from "@/utils/grid";
 import { generatePuzzle } from "@/utils/nonogramGenerator";
+import { NONOGRAM_PUZZLES } from "@/data/nonogram-puzzles";
 import { SoundEffects, setVolume, setMuted } from "@/lib/sound";
 import { Haptic, setHapticEnabled } from "@/lib/haptic";
 import { useSettingsStore } from "@/stores/settingsStore";
@@ -22,7 +23,8 @@ interface PuzzleData {
   grid: number[][];
 }
 
-const PUZZLES: PuzzleData[] = [
+// Use expanded puzzle database + legacy inline puzzles
+const LEGACY_PUZZLES: PuzzleData[] = [
   // 5x5 Puzzles
   {
     id: "heart",
@@ -628,10 +630,32 @@ const PUZZLES: PuzzleData[] = [
   },
 ];
 
+// Merge legacy puzzles with expanded database (deduplicate by id)
+const PUZZLES: PuzzleData[] = (() => {
+  const allPuzzles = [
+    ...NONOGRAM_PUZZLES.map((p) => ({
+      id: p.id,
+      name: p.name,
+      emoji: p.emoji,
+      size: p.size,
+      grid: p.grid,
+    })),
+    ...LEGACY_PUZZLES,
+  ];
+  const seen = new Set<string>();
+  return allPuzzles.filter((p) => {
+    if (seen.has(p.id)) return false;
+    seen.add(p.id);
+    return true;
+  });
+})();
+
 const SIZE_GROUPS = [
-  { label: "5x5 (\uC26C\uC6C0)", size: 5 },
-  { label: "7x7 (\uBCF4\uD1B5)", size: 7 },
-  { label: "10x10 (\uC5B4\uB824\uC6C0)", size: 10 },
+  { label: "5x5 (쉬움)", size: 5 },
+  { label: "7x7 (보통)", size: 7 },
+  { label: "10x10 (어려움)", size: 10 },
+  { label: "12x12 (전문가)", size: 12 },
+  { label: "15x15 (극한)", size: 15 },
 ];
 
 // ---- Best time helpers ----

@@ -13,7 +13,19 @@ interface PatternMemoryGameProps {
 }
 
 type Phase = "ready" | "showing" | "input" | "feedback" | "gameover";
-type Mode = "normal" | "reverse" | "color" | "double";
+type Mode =
+  | "normal"
+  | "reverse"
+  | "color"
+  | "double"
+  | "spiral"
+  | "mirror"
+  | "speed"
+  | "decay"
+  | "chain"
+  | "blind"
+  | "math"
+  | "rotation";
 
 const GRID_SIZES: Record<string, number> = {
   easy: 3,
@@ -29,6 +41,14 @@ const MODE_MULTIPLIERS: Record<Mode, number> = {
   reverse: 1.5,
   color: 2,
   double: 2.5,
+  spiral: 1.6,
+  mirror: 2.0,
+  speed: 1.8,
+  decay: 2.2,
+  chain: 1.7,
+  blind: 2.5,
+  math: 2.3,
+  rotation: 2.0,
 };
 
 const MODE_COLORS: Record<Mode, string> = {
@@ -36,6 +56,14 @@ const MODE_COLORS: Record<Mode, string> = {
   reverse: "#E84393",
   color: "#00CEC9",
   double: "#FDCB6E",
+  spiral: "#A29BFE",
+  mirror: "#74B9FF",
+  speed: "#FF7675",
+  decay: "#636E72",
+  chain: "#55EFC4",
+  blind: "#2D3436",
+  math: "#FAB1A0",
+  rotation: "#81ECEC",
 };
 
 const MODE_LABELS: Record<Mode, string> = {
@@ -43,11 +71,27 @@ const MODE_LABELS: Record<Mode, string> = {
   reverse: "역순",
   color: "컬러",
   double: "더블",
+  spiral: "나선",
+  mirror: "거울",
+  speed: "속도",
+  decay: "소멸",
+  chain: "연쇄",
+  blind: "블라인드",
+  math: "수학",
+  rotation: "회전",
 };
 
 function getMode(round: number): Mode {
-  if (round >= 15) return "double";
-  if (round >= 10) return "color";
+  if (round >= 26) return "double";
+  if (round >= 24) return "rotation";
+  if (round >= 22) return "math";
+  if (round >= 20) return "blind";
+  if (round >= 18) return "decay";
+  if (round >= 16) return "spiral";
+  if (round >= 14) return "mirror";
+  if (round >= 12) return "chain";
+  if (round >= 10) return "speed";
+  if (round >= 8) return "color";
   if (round >= 5) return "reverse";
   return "normal";
 }
@@ -60,9 +104,80 @@ function getModeAnnouncement(mode: Mode): string | null {
       return "컬러 모드!";
     case "double":
       return "더블 모드!";
+    case "spiral":
+      return "나선 모드!";
+    case "mirror":
+      return "거울 모드!";
+    case "speed":
+      return "속도 모드!";
+    case "decay":
+      return "소멸 모드!";
+    case "chain":
+      return "연쇄 모드!";
+    case "blind":
+      return "블라인드 모드!";
+    case "math":
+      return "수학 모드!";
+    case "rotation":
+      return "회전 모드!";
     default:
       return null;
   }
+}
+
+/* ------------------------------------------------------------------ */
+/*  Helper: generate spiral order for a grid                           */
+/* ------------------------------------------------------------------ */
+function generateSpiralOrder(size: number): number[] {
+  const result: number[] = [];
+  let top = 0,
+    bottom = size - 1,
+    left = 0,
+    right = size - 1;
+  while (top <= bottom && left <= right) {
+    for (let i = left; i <= right; i++) result.push(top * size + i);
+    top++;
+    for (let i = top; i <= bottom; i++) result.push(i * size + right);
+    right--;
+    if (top <= bottom) {
+      for (let i = right; i >= left; i--) result.push(bottom * size + i);
+      bottom--;
+    }
+    if (left <= right) {
+      for (let i = bottom; i >= top; i--) result.push(i * size + left);
+      left++;
+    }
+  }
+  return result;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Helper: mirror a cell index horizontally                           */
+/* ------------------------------------------------------------------ */
+function mirrorCell(cellIndex: number, gridSize: number): number {
+  const row = Math.floor(cellIndex / gridSize);
+  const col = cellIndex % gridSize;
+  const mirroredCol = gridSize - 1 - col;
+  return row * gridSize + mirroredCol;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Helper: rotate cell position 90 degrees clockwise                  */
+/* ------------------------------------------------------------------ */
+function rotateCell90(
+  cellIndex: number,
+  gridSize: number,
+  times: number,
+): number {
+  let row = Math.floor(cellIndex / gridSize);
+  let col = cellIndex % gridSize;
+  for (let t = 0; t < times; t++) {
+    const newRow = col;
+    const newCol = gridSize - 1 - row;
+    row = newRow;
+    col = newCol;
+  }
+  return row * gridSize + col;
 }
 
 /* ------------------------------------------------------------------ */
@@ -201,6 +316,15 @@ export default function PatternMemoryGame({
   const [consecutiveCorrect, setConsecutiveCorrect] = useState(0);
   const [flashIndex, setFlashIndex] = useState(-1);
 
+  // New mode states
+  const [chainSequence, setChainSequence] = useState<number[]>([]);
+  const [mathNumbers, setMathNumbers] = useState<number[]>([]);
+  const [mathTarget, setMathTarget] = useState(0);
+  const [rotationTimes, setRotationTimes] = useState(1);
+  const [decayHidden, setDecayHidden] = useState<number[]>([]);
+  const [blindGrid, setBlindGrid] = useState(false);
+  const [speedFlashDuration, setSpeedFlashDuration] = useState(FLASH_DURATION);
+
   const showTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const announcementTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -274,6 +398,51 @@ export default function PatternMemoryGame({
           seq.push(cell1, cell2);
           colors.push(0, 0);
         }
+      } else if (currentMode === "spiral") {
+        // Pick cells along the spiral path (outside-in)
+        const spiralOrder = generateSpiralOrder(gridSize);
+        const startIdx = Math.floor(
+          Math.random() * Math.max(1, spiralOrder.length - length),
+        );
+        for (let i = 0; i < length; i++) {
+          seq.push(spiralOrder[(startIdx + i) % spiralOrder.length]);
+          colors.push(0);
+        }
+      } else if (currentMode === "mirror") {
+        // Generate cells only on the left half, player reproduces mirrored on right
+        const halfCols = Math.floor(gridSize / 2);
+        for (let i = 0; i < length; i++) {
+          const row = Math.floor(Math.random() * gridSize);
+          const col = Math.floor(Math.random() * Math.max(1, halfCols));
+          seq.push(row * gridSize + col);
+          colors.push(0);
+        }
+      } else if (currentMode === "math") {
+        // Generate numbers for all cells; pick a subset whose sum = target
+        const nums: number[] = [];
+        for (let i = 0; i < totalCells; i++) {
+          nums.push(Math.floor(Math.random() * 9) + 1);
+        }
+        setMathNumbers(nums);
+        // Pick `length` random cells as the answer
+        const indices = Array.from({ length: totalCells }, (_, i) => i);
+        const answerCount = Math.min(length, Math.floor(totalCells / 2));
+        const shuffled = indices.sort(() => Math.random() - 0.5);
+        const answerCells = shuffled.slice(0, answerCount);
+        const target = answerCells.reduce((sum, idx) => sum + nums[idx], 0);
+        setMathTarget(target);
+        for (const cell of answerCells) {
+          seq.push(cell);
+          colors.push(0);
+        }
+      } else if (currentMode === "rotation") {
+        // Generate normal sequence; set rotation amount
+        const times = Math.random() < 0.5 ? 1 : 2; // 90 or 180 degrees
+        setRotationTimes(times);
+        for (let i = 0; i < length; i++) {
+          seq.push(Math.floor(Math.random() * totalCells));
+          colors.push(0);
+        }
       } else {
         for (let i = 0; i < length; i++) {
           seq.push(Math.floor(Math.random() * totalCells));
@@ -293,7 +462,7 @@ export default function PatternMemoryGame({
 
       return { seq, colors };
     },
-    [totalCells],
+    [totalCells, gridSize],
   );
 
   const getExpectedInput = useCallback((): number[] => {
@@ -306,18 +475,72 @@ export default function PatternMemoryGame({
     if (mode === "double") {
       return [...sequence];
     }
+    if (mode === "mirror") {
+      // Player must tap the mirrored positions in order
+      return sequence.map((cell) => mirrorCell(cell, gridSize));
+    }
+    if (mode === "chain") {
+      return [...chainSequence];
+    }
+    if (mode === "decay") {
+      // Player must remember the full original sequence (including decayed cells)
+      return [...sequence];
+    }
+    if (mode === "math") {
+      // Player can tap in any order; we sort for comparison later
+      // But we use set-based comparison in handleCellTap instead
+      return [...sequence];
+    }
+    if (mode === "rotation") {
+      return sequence.map((cell) =>
+        rotateCell90(cell, gridSize, rotationTimes),
+      );
+    }
+    // normal, speed, spiral, blind all use sequence as-is
     return [...sequence];
-  }, [mode, sequence, colorSequence]);
+  }, [mode, sequence, colorSequence, gridSize, chainSequence, rotationTimes]);
 
   const playSequence = useCallback(
     (seq: number[], colors: number[], currentMode: Mode) => {
       setPhase("showing");
       setFlashingCell(null);
       setFlashIndex(-1);
+      setBlindGrid(false);
+      setDecayHidden([]);
 
       // Slightly slower at higher levels (round > 8)
       const levelSlowdown = Math.min(150, Math.max(0, (seq.length - 5) * 20));
-      const adjustedFlashDuration = FLASH_DURATION + levelSlowdown;
+      let adjustedFlashDuration = FLASH_DURATION + levelSlowdown;
+
+      // Speed mode: use decreasing flash duration
+      if (currentMode === "speed") {
+        adjustedFlashDuration = speedFlashDuration;
+      }
+
+      // Math mode: show all numbers briefly, then go to input
+      if (currentMode === "math") {
+        // Flash the answer cells to hint, then go to input
+        let i = 0;
+        const showNext = () => {
+          if (i >= seq.length) {
+            setFlashingCell(null);
+            setFlashIndex(-1);
+            setPhase("input");
+            return;
+          }
+          setFlashingCell(seq[i]);
+          setFlashingColor(CELL_COLORS[0]);
+          setFlashIndex(i);
+          showTimerRef.current = setTimeout(() => {
+            setFlashingCell(null);
+            setFlashIndex(-1);
+            i++;
+            showTimerRef.current = setTimeout(showNext, FLASH_GAP);
+          }, adjustedFlashDuration);
+        };
+        showTimerRef.current = setTimeout(showNext, 500);
+        return;
+      }
 
       if (currentMode === "double") {
         let step = 0;
@@ -357,6 +580,35 @@ export default function PatternMemoryGame({
           if (i >= seq.length) {
             setFlashingCell(null);
             setFlashIndex(-1);
+
+            // Decay mode: after showing, hide some cells randomly
+            if (currentMode === "decay") {
+              const decayCount = Math.max(1, Math.floor(seq.length * 0.4));
+              const indices = Array.from(
+                { length: seq.length },
+                (_, idx) => idx,
+              );
+              const shuffled = indices.sort(() => Math.random() - 0.5);
+              const hidden = shuffled
+                .slice(0, decayCount)
+                .map((idx) => seq[idx]);
+              setDecayHidden(hidden);
+              // Brief pause showing partial pattern, then input
+              showTimerRef.current = setTimeout(() => {
+                setPhase("input");
+              }, 800);
+              return;
+            }
+
+            // Blind mode: briefly show grid, then hide it
+            if (currentMode === "blind") {
+              showTimerRef.current = setTimeout(() => {
+                setBlindGrid(true);
+                setPhase("input");
+              }, 300);
+              return;
+            }
+
             setPhase("input");
             return;
           }
@@ -376,7 +628,7 @@ export default function PatternMemoryGame({
         showTimerRef.current = setTimeout(showNext, 500);
       }
     },
-    [],
+    [speedFlashDuration],
   );
 
   const startRound = useCallback(
@@ -384,6 +636,49 @@ export default function PatternMemoryGame({
       const newMode = getMode(roundNum);
       const prevMode = getMode(roundNum - 1);
       const seqLength = roundNum + 2;
+
+      // Speed mode: decrease flash duration each round (min 100ms)
+      if (newMode === "speed") {
+        setSpeedFlashDuration((prev) => Math.max(100, prev - 50));
+      } else {
+        setSpeedFlashDuration(FLASH_DURATION);
+      }
+
+      // Chain mode: add one cell to previous chain
+      if (newMode === "chain") {
+        const newCell = Math.floor(Math.random() * totalCells);
+        const newChain = [...chainSequence, newCell];
+        setChainSequence(newChain);
+        const colors = newChain.map(() => 0);
+        setSequence(newChain);
+        setColorSequence(colors);
+        setInputSequence([]);
+        setRound(roundNum);
+        setMode(newMode);
+        setFeedbackType(null);
+        setWrongCell(null);
+        setBlindGrid(false);
+        setDecayHidden([]);
+
+        if (newMode !== prevMode && roundNum > 1) {
+          const announcement = getModeAnnouncement(newMode);
+          setModeAnnouncement(announcement);
+          SoundEffects.levelUp();
+          Haptic.achievement();
+          announcementTimerRef.current = setTimeout(() => {
+            setModeAnnouncement(null);
+            playSequence(newChain, colors, newMode);
+          }, 2000);
+        } else {
+          playSequence(newChain, colors, newMode);
+        }
+        return;
+      }
+
+      // Reset chain when leaving chain mode
+      if (prevMode === "chain") {
+        setChainSequence([]);
+      }
 
       const { seq, colors } = generateSequence(seqLength, newMode);
       setSequence(seq);
@@ -393,6 +688,8 @@ export default function PatternMemoryGame({
       setMode(newMode);
       setFeedbackType(null);
       setWrongCell(null);
+      setBlindGrid(false);
+      setDecayHidden([]);
 
       if (newMode !== prevMode && roundNum > 1) {
         const announcement = getModeAnnouncement(newMode);
@@ -407,7 +704,7 @@ export default function PatternMemoryGame({
         playSequence(seq, colors, newMode);
       }
     },
-    [generateSequence, playSequence],
+    [generateSequence, playSequence, totalCells, chainSequence],
   );
 
   const startGame = useCallback(() => {
@@ -418,6 +715,13 @@ export default function PatternMemoryGame({
     setMaxSequence(0);
     setConsecutiveCorrect(0);
     setWrongCell(null);
+    setChainSequence([]);
+    setMathNumbers([]);
+    setMathTarget(0);
+    setRotationTimes(1);
+    setDecayHidden([]);
+    setBlindGrid(false);
+    setSpeedFlashDuration(FLASH_DURATION);
     startRound(1);
   }, [startRound]);
 
@@ -439,7 +743,20 @@ export default function PatternMemoryGame({
 
       const currentIndex = newInput.length - 1;
 
-      if (newInput[currentIndex] !== expected[currentIndex]) {
+      // Math mode: unordered comparison (set-based)
+      const isMathMode = mode === "math";
+      let isWrongTap = false;
+
+      if (isMathMode) {
+        // In math mode, check if tapped cell is in the expected set and not already tapped
+        const alreadyTapped = inputSequence.includes(cellIndex);
+        const inExpected = expected.includes(cellIndex);
+        isWrongTap = !inExpected || alreadyTapped;
+      } else {
+        isWrongTap = newInput[currentIndex] !== expected[currentIndex];
+      }
+
+      if (isWrongTap) {
         SoundEffects.wrong();
         Haptic.wrong();
         setFeedbackType("wrong");
@@ -489,6 +806,7 @@ export default function PatternMemoryGame({
         feedbackTimerRef.current = setTimeout(() => {
           setFeedbackType(null);
           setWrongCell(null);
+          setBlindGrid(false);
           startRound(round + 1);
         }, 600);
       }
@@ -752,7 +1070,23 @@ export default function PatternMemoryGame({
                     ? "역순으로 입력하세요!"
                     : mode === "color"
                       ? "보라색 셀만 순서대로!"
-                      : "순서대로 입력하세요!"}
+                      : mode === "mirror"
+                        ? "거울처럼 반대쪽을 터치!"
+                        : mode === "spiral"
+                          ? "나선 순서대로 입력!"
+                          : mode === "speed"
+                            ? "빠르게! 순서대로 입력!"
+                            : mode === "decay"
+                              ? "사라진 셀 포함 전체 순서!"
+                              : mode === "chain"
+                                ? "전체 연쇄 순서를 입력!"
+                                : mode === "blind"
+                                  ? "기억만으로 입력하세요!"
+                                  : mode === "math"
+                                    ? `합이 ${mathTarget}이 되는 셀을 선택!`
+                                    : mode === "rotation"
+                                      ? `${rotationTimes === 1 ? "90" : "180"}도 회전 후 위치를 입력!`
+                                      : "순서대로 입력하세요!"}
                 </div>
                 <div className="text-xs text-white/40 font-medium tabular-nums">
                   Step {inputSequence.length}/{expectedInput.length}
@@ -760,6 +1094,45 @@ export default function PatternMemoryGame({
               </motion.div>
             )}
           </AnimatePresence>
+
+          {/* Math target display */}
+          {mode === "math" && phase === "input" && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              className="mb-2 px-4 py-1.5 rounded-full text-sm font-bold"
+              style={{
+                background: "linear-gradient(135deg, #FAB1A030, #FAB1A010)",
+                border: "1px solid #FAB1A050",
+                color: "#FAB1A0",
+              }}
+            >
+              Target: {mathTarget}
+              {inputSequence.length > 0 && (
+                <span className="ml-2 text-white/50">
+                  (Current:{" "}
+                  {inputSequence.reduce(
+                    (sum, idx) => sum + (mathNumbers[idx] || 0),
+                    0,
+                  )}
+                  )
+                </span>
+              )}
+            </motion.div>
+          )}
+
+          {/* Rotation indicator */}
+          {mode === "rotation" && phase === "input" && (
+            <motion.div
+              initial={{ opacity: 0, rotate: 0 }}
+              animate={{ opacity: 1, rotate: rotationTimes * 90 }}
+              transition={{ duration: 0.5 }}
+              className="mb-2 text-2xl"
+              style={{ color: "#81ECEC" }}
+            >
+              {rotationTimes === 1 ? "90" : "180"}
+            </motion.div>
+          )}
 
           {/* Grid */}
           <div className="relative mt-2">
@@ -795,6 +1168,12 @@ export default function PatternMemoryGame({
                 const tapIndex = inputSequence.indexOf(i);
                 const isTapped = tapIndex !== -1;
                 const isWrong = wrongCell === i && feedbackType === "wrong";
+                const isDecayed =
+                  mode === "decay" &&
+                  phase === "input" &&
+                  decayHidden.includes(i);
+                const isBlinded =
+                  mode === "blind" && blindGrid && phase === "input";
 
                 // Green wave animation delay based on position
                 const row = Math.floor(i / gridSize);
@@ -812,6 +1191,13 @@ export default function PatternMemoryGame({
                       height: cellSize,
                       borderRadius: "16px",
                       cursor: phase === "input" ? "pointer" : "default",
+                      // Blind mode: all cells look identical during input
+                      opacity:
+                        isBlinded && !isTapped && !isWrong
+                          ? 0.15
+                          : isDecayed && !isTapped
+                            ? 0.3
+                            : 1,
                       // Glassmorphism base
                       background: isFlashing
                         ? `radial-gradient(circle at center, ${flashingColor}DD, ${flashingColor}88)`
@@ -819,7 +1205,9 @@ export default function PatternMemoryGame({
                           ? `radial-gradient(circle at center, #00B894CC, #00B89466)`
                           : isWrong
                             ? `radial-gradient(circle at center, #E17055DD, #E1705588)`
-                            : "rgba(255,255,255,0.04)",
+                            : isDecayed && !isTapped
+                              ? "rgba(100,100,100,0.1)"
+                              : "rgba(255,255,255,0.04)",
                       border: isFlashing
                         ? `1px solid ${flashingColor}80`
                         : feedbackType === "correct" && isTapped
@@ -876,6 +1264,19 @@ export default function PatternMemoryGame({
                       {isFlashing && <CellRipple color={flashingColor} />}
                     </AnimatePresence>
 
+                    {/* Math mode: show numbers on cells */}
+                    {mode === "math" &&
+                      phase === "input" &&
+                      !isTapped &&
+                      mathNumbers[i] !== undefined && (
+                        <span
+                          className="relative z-10 text-white/70 text-sm font-bold"
+                          style={{ textShadow: "0 1px 2px rgba(0,0,0,0.3)" }}
+                        >
+                          {mathNumbers[i]}
+                        </span>
+                      )}
+
                     {/* Tap number indicator */}
                     {phase === "input" && isTapped && (
                       <motion.span
@@ -886,7 +1287,7 @@ export default function PatternMemoryGame({
                           textShadow: "0 1px 3px rgba(0,0,0,0.3)",
                         }}
                       >
-                        {tapIndex + 1}
+                        {mode === "math" ? mathNumbers[i] : tapIndex + 1}
                       </motion.span>
                     )}
 
@@ -1136,14 +1537,7 @@ export default function PatternMemoryGame({
                       { label: "최대 시퀀스", value: maxSequence },
                       {
                         label: "최종 모드",
-                        value:
-                          mode === "normal"
-                            ? "일반"
-                            : mode === "reverse"
-                              ? "역순"
-                              : mode === "color"
-                                ? "컬러"
-                                : "더블",
+                        value: MODE_LABELS[mode],
                       },
                     ].map((stat, idx) => (
                       <motion.div
@@ -1257,6 +1651,40 @@ export default function PatternMemoryGame({
                         <li>
                           <span className="font-bold text-white">색상:</span>{" "}
                           색깔까지 기억해야 합니다
+                        </li>
+                        <li>
+                          <span className="font-bold text-white">속도:</span>{" "}
+                          점점 빨라지는 패턴!
+                        </li>
+                        <li>
+                          <span className="font-bold text-white">연쇄:</span>{" "}
+                          시퀀스가 계속 길어짐
+                        </li>
+                        <li>
+                          <span className="font-bold text-white">거울:</span>{" "}
+                          좌우 반전된 위치를 입력
+                        </li>
+                        <li>
+                          <span className="font-bold text-white">나선:</span>{" "}
+                          나선형 패턴을 기억
+                        </li>
+                        <li>
+                          <span className="font-bold text-white">소멸:</span>{" "}
+                          일부 셀이 사라진 후 전체 기억
+                        </li>
+                        <li>
+                          <span className="font-bold text-white">
+                            블라인드:
+                          </span>{" "}
+                          그리드가 숨겨진 채로 입력
+                        </li>
+                        <li>
+                          <span className="font-bold text-white">수학:</span>{" "}
+                          목표 합이 되는 숫자 셀 선택
+                        </li>
+                        <li>
+                          <span className="font-bold text-white">회전:</span>{" "}
+                          회전된 위치를 추론하여 입력
                         </li>
                         <li>
                           <span className="font-bold text-white">더블:</span> 두

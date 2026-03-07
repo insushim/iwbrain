@@ -14,6 +14,7 @@ interface MathRushGameProps {
 interface Problem {
   expression: string;
   answer: number;
+  problemType?: string;
 }
 
 interface FloatingText {
@@ -27,10 +28,39 @@ function randomInt(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
+// Roman numeral helpers for level 18
+const ROMAN_VALUES: [string, number][] = [
+  ["M", 1000],
+  ["CM", 900],
+  ["D", 500],
+  ["CD", 400],
+  ["C", 100],
+  ["XC", 90],
+  ["L", 50],
+  ["XL", 40],
+  ["X", 10],
+  ["IX", 9],
+  ["V", 5],
+  ["IV", 4],
+  ["I", 1],
+];
+function toRoman(num: number): string {
+  let result = "";
+  for (const [symbol, value] of ROMAN_VALUES) {
+    while (num >= value) {
+      result += symbol;
+      num -= value;
+    }
+  }
+  return result;
+}
+
 function generateProblem(level: number): Problem {
   let a: number, b: number, c: number, expression: string, answer: number;
+  let problemType: string;
   switch (level) {
     case 1: // single digit +/-
+      problemType = "기초 덧뺄셈";
       a = randomInt(1, 9);
       b = randomInt(1, 9);
       if (Math.random() < 0.5) {
@@ -43,6 +73,7 @@ function generateProblem(level: number): Problem {
       }
       break;
     case 2: // two digit +/-
+      problemType = "두자리 덧뺄셈";
       a = randomInt(10, 99);
       b = randomInt(10, 99);
       if (Math.random() < 0.5) {
@@ -55,18 +86,21 @@ function generateProblem(level: number): Problem {
       }
       break;
     case 3: // single digit ×
+      problemType = "기초 곱셈";
       a = randomInt(2, 9);
       b = randomInt(2, 9);
       expression = `${a} × ${b}`;
       answer = a * b;
       break;
     case 4: // two×single digit
+      problemType = "큰 곱셈";
       a = randomInt(11, 56);
       b = randomInt(2, 9);
       expression = `${a} × ${b}`;
       answer = a * b;
       break;
     case 5: // mixed ops
+      problemType = "복합 연산";
       a = randomInt(5, 30);
       b = randomInt(5, 30);
       c = randomInt(1, 9);
@@ -83,15 +117,16 @@ function generateProblem(level: number): Problem {
       break;
     case 6: {
       // division
+      problemType = "나눗셈";
       b = randomInt(2, 12);
-      const quotient = randomInt(2, 12);
-      a = b * quotient;
+      const quotient6 = randomInt(2, 12);
+      a = b * quotient6;
       expression = `${a} ÷ ${b}`;
-      answer = quotient;
+      answer = quotient6;
       break;
     }
     case 7: // three digit +/-
-    default:
+      problemType = "큰 수 계산";
       a = randomInt(100, 999);
       b = randomInt(100, 999);
       if (Math.random() < 0.5) {
@@ -103,8 +138,278 @@ function generateProblem(level: number): Problem {
         answer = a - b;
       }
       break;
+    case 8: // three number operations
+      problemType = "세 수 연산";
+      a = randomInt(10, 50);
+      b = randomInt(2, 9);
+      c = randomInt(10, 50);
+      if (Math.random() < 0.5) {
+        expression = `${a} + ${b} × ${c}`;
+        answer = a + b * c;
+      } else {
+        expression = `${a} × ${b} + ${c}`;
+        answer = a * b + c;
+      }
+      break;
+    case 9: {
+      // Squares and square roots
+      problemType = "제곱 & 제곱근";
+      if (Math.random() < 0.5) {
+        a = randomInt(2, 15);
+        expression = `${a}² = ?`;
+        answer = a * a;
+      } else {
+        a = randomInt(2, 12);
+        const sq = a * a;
+        expression = `√${sq} = ?`;
+        answer = a;
+      }
+      break;
+    }
+    case 10: {
+      // Percentage calculations
+      problemType = "백분율 계산";
+      const percents = [10, 20, 25, 30, 40, 50, 60, 75, 80, 90];
+      const pct = percents[randomInt(0, percents.length - 1)];
+      // Pick base so result is whole number
+      const bases = [20, 40, 50, 60, 80, 100, 120, 200, 400, 500];
+      b = bases[randomInt(0, bases.length - 1)];
+      expression = `${pct}% of ${b} = ?`;
+      answer = (pct * b) / 100;
+      break;
+    }
+    case 11: {
+      // Fraction comparisons - "which is bigger" as a numerical answer
+      problemType = "분수 비교";
+      // Generate two fractions, ask for the bigger one as decimal×denominator product
+      // Simpler approach: convert fraction to number
+      const pairs: [number, number, number, number][] = [
+        [3, 4, 2, 3],
+        [1, 2, 2, 5],
+        [5, 8, 3, 5],
+        [7, 10, 2, 3],
+        [4, 5, 3, 4],
+        [5, 6, 7, 9],
+        [1, 3, 2, 7],
+        [3, 8, 1, 3],
+        [2, 3, 5, 8],
+        [4, 7, 3, 5],
+      ];
+      const pair = pairs[randomInt(0, pairs.length - 1)];
+      const [n1, d1, n2, d2] = pair;
+      const v1 = n1 / d1;
+      const v2 = n2 / d2;
+      if (Math.random() < 0.5) {
+        // Ask: n1/d1 + n2/d2 (find common denominator, give integer answer)
+        // Instead, simpler: "Which is bigger? Answer the numerator of the bigger one"
+        expression = `${n1}/${d1} vs ${n2}/${d2} 큰 쪽 분자?`;
+        answer = v1 >= v2 ? n1 : n2;
+      } else {
+        // Fraction to decimal: what is n/d × d (trivial) - let's do fraction addition
+        // Simple fraction question: what is n/d of X?
+        a = randomInt(2, 5) * d1; // ensure whole number result
+        expression = `${n1}/${d1} × ${a} = ?`;
+        answer = (n1 * a) / d1;
+      }
+      break;
+    }
+    case 12: {
+      // Order of operations
+      problemType = "연산 순서";
+      const variant = randomInt(0, 2);
+      if (variant === 0) {
+        a = randomInt(2, 10);
+        b = randomInt(2, 8);
+        c = randomInt(1, 5);
+        expression = `${a} + ${b} × ${c} = ?`;
+        answer = a + b * c;
+      } else if (variant === 1) {
+        a = randomInt(2, 9);
+        b = randomInt(2, 9);
+        c = randomInt(1, 10);
+        expression = `${a} × ${b} - ${c} = ?`;
+        answer = a * b - c;
+      } else {
+        a = randomInt(1, 8);
+        b = randomInt(1, 8);
+        c = randomInt(2, 6);
+        expression = `(${a} + ${b}) × ${c} = ?`;
+        answer = (a + b) * c;
+      }
+      break;
+    }
+    case 13: {
+      // Powers of 2
+      problemType = "거듭제곱";
+      if (Math.random() < 0.6) {
+        a = randomInt(2, 10);
+        expression = `2^${a} = ?`;
+        answer = Math.pow(2, a);
+      } else {
+        a = randomInt(2, 5);
+        b = randomInt(2, 4);
+        expression = `${a}^${b} = ?`;
+        answer = Math.pow(a, b);
+      }
+      break;
+    }
+    case 14: {
+      // Negative number arithmetic
+      problemType = "음수 연산";
+      const variant14 = randomInt(0, 2);
+      if (variant14 === 0) {
+        a = -randomInt(1, 15);
+        b = randomInt(1, 20);
+        expression = `(${a}) + ${b} = ?`;
+        answer = a + b;
+      } else if (variant14 === 1) {
+        a = -randomInt(1, 9);
+        b = randomInt(2, 9);
+        expression = `(${a}) × ${b} = ?`;
+        answer = a * b;
+      } else {
+        a = -randomInt(1, 10);
+        b = -randomInt(1, 10);
+        expression = `(${a}) + (${b}) = ?`;
+        answer = a + b;
+      }
+      break;
+    }
+    case 15: {
+      // Missing number puzzles
+      problemType = "빈칸 채우기";
+      const variant15 = randomInt(0, 2);
+      if (variant15 === 0) {
+        a = randomInt(3, 20);
+        b = randomInt(1, 15);
+        answer = a - b;
+        expression = `? + ${b} = ${a}`;
+      } else if (variant15 === 1) {
+        a = randomInt(2, 12);
+        b = randomInt(2, 9);
+        answer = a;
+        expression = `? × ${b} = ${a * b}`;
+      } else {
+        a = randomInt(10, 50);
+        b = randomInt(1, a - 1);
+        answer = a - b;
+        expression = `${a} - ? = ${b}`;
+      }
+      break;
+    }
+    case 16: {
+      // Modular arithmetic
+      problemType = "나머지 연산";
+      b = randomInt(2, 10);
+      a = randomInt(b + 1, b * 10 + randomInt(1, b - 1));
+      answer = a % b;
+      expression = `${a} mod ${b} = ?`;
+      break;
+    }
+    case 17: {
+      // Number sequences
+      problemType = "수열 추론";
+      const seqType = randomInt(0, 3);
+      if (seqType === 0) {
+        // Geometric: multiply by 2 or 3
+        const ratio = randomInt(2, 3);
+        a = randomInt(1, 5);
+        const seq = [a, a * ratio, a * ratio ** 2, a * ratio ** 3];
+        answer = a * ratio ** 4;
+        expression = `${seq.join(", ")}, ? = ?`;
+      } else if (seqType === 1) {
+        // Arithmetic: add constant
+        const diff = randomInt(2, 7);
+        a = randomInt(1, 10);
+        const seq = [a, a + diff, a + diff * 2, a + diff * 3];
+        answer = a + diff * 4;
+        expression = `${seq.join(", ")}, ? = ?`;
+      } else if (seqType === 2) {
+        // Squares: 1, 4, 9, 16, ?
+        a = randomInt(1, 4);
+        const seq = [a ** 2, (a + 1) ** 2, (a + 2) ** 2, (a + 3) ** 2];
+        answer = (a + 4) ** 2;
+        expression = `${seq.join(", ")}, ? = ?`;
+      } else {
+        // Fibonacci-like
+        a = randomInt(1, 5);
+        b = randomInt(1, 5);
+        const s3 = a + b,
+          s4 = b + s3,
+          s5 = s3 + s4;
+        expression = `${a}, ${b}, ${s3}, ${s4}, ? = ?`;
+        answer = s5;
+      }
+      break;
+    }
+    case 18: {
+      // Roman numeral conversion
+      problemType = "로마 숫자";
+      if (Math.random() < 0.5) {
+        a = randomInt(1, 50);
+        expression = `${toRoman(a)} = ?`;
+        answer = a;
+      } else {
+        a = randomInt(1, 39);
+        b = randomInt(1, 39);
+        const sum = a + b;
+        expression = `${toRoman(a)} + ${toRoman(b)} = ?`;
+        answer = sum;
+      }
+      break;
+    }
+    case 19: {
+      // Base conversion (binary/other to decimal)
+      problemType = "진법 변환";
+      if (Math.random() < 0.6) {
+        // Binary to decimal
+        a = randomInt(2, 31);
+        expression = `이진수 ${a.toString(2)} = ?`;
+        answer = a;
+      } else {
+        // Octal to decimal
+        a = randomInt(8, 63);
+        expression = `8진수 ${a.toString(8)} = ?`;
+        answer = a;
+      }
+      break;
+    }
+    case 20:
+    default: {
+      // Complex multi-step
+      problemType = "복합 사고";
+      const variant20 = randomInt(0, 3);
+      if (variant20 === 0) {
+        // a² + b²
+        a = randomInt(2, 9);
+        b = randomInt(2, 9);
+        expression = `${a}² + ${b}² = ?`;
+        answer = a * a + b * b;
+      } else if (variant20 === 1) {
+        // a × (b + c) - d
+        a = randomInt(2, 6);
+        b = randomInt(2, 8);
+        c = randomInt(1, 8);
+        const d = randomInt(1, 10);
+        expression = `${a} × (${b} + ${c}) - ${d} = ?`;
+        answer = a * (b + c) - d;
+      } else if (variant20 === 2) {
+        // (a + b)²
+        a = randomInt(1, 7);
+        b = randomInt(1, 7);
+        expression = `(${a} + ${b})² = ?`;
+        answer = (a + b) * (a + b);
+      } else {
+        // a³ - b
+        a = randomInt(2, 5);
+        b = randomInt(1, 20);
+        expression = `${a}³ - ${b} = ?`;
+        answer = a * a * a - b;
+      }
+      break;
+    }
   }
-  return { expression, answer };
+  return { expression, answer, problemType };
 }
 
 function generateChoices(correct: number): number[] {
@@ -135,40 +440,92 @@ const LEVEL_NAMES = [
   "Lv.5 복합",
   "Lv.6 나눗셈",
   "Lv.7 큰수",
+  "Lv.8 세수연산",
+  "Lv.9 제곱근",
+  "Lv.10 백분율",
+  "Lv.11 분수",
+  "Lv.12 연산순서",
+  "Lv.13 거듭제곱",
+  "Lv.14 음수",
+  "Lv.15 빈칸",
+  "Lv.16 나머지",
+  "Lv.17 수열",
+  "Lv.18 로마숫자",
+  "Lv.19 진법",
+  "Lv.20 복합사고",
 ];
 
 const DIFFICULTY_LABELS = [
   "",
-  "쉬움",
-  "쉬움",
-  "보통",
-  "보통",
-  "어려움",
-  "어려움",
-  "극한",
+  "쉬움", // 1
+  "쉬움", // 2
+  "보통", // 3
+  "보통", // 4
+  "보통", // 5
+  "어려움", // 6
+  "어려움", // 7
+  "어려움", // 8
+  "고급", // 9
+  "고급", // 10
+  "고급", // 11
+  "고급", // 12
+  "전문가", // 13
+  "전문가", // 14
+  "전문가", // 15
+  "전문가", // 16
+  "극한", // 17
+  "극한", // 18
+  "극한", // 19
+  "전설", // 20
 ];
 
 const DIFFICULTY_COLORS = [
   "",
-  "#22C55E",
-  "#22C55E",
-  "#F59E0B",
-  "#F59E0B",
-  "#EF4444",
-  "#EF4444",
-  "#DC2626",
+  "#22C55E", // 1
+  "#22C55E", // 2
+  "#F59E0B", // 3
+  "#F59E0B", // 4
+  "#F59E0B", // 5
+  "#EF4444", // 6
+  "#EF4444", // 7
+  "#EF4444", // 8
+  "#A855F7", // 9
+  "#A855F7", // 10
+  "#A855F7", // 11
+  "#A855F7", // 12
+  "#EC4899", // 13
+  "#EC4899", // 14
+  "#EC4899", // 15
+  "#EC4899", // 16
+  "#DC2626", // 17
+  "#DC2626", // 18
+  "#DC2626", // 19
+  "#FFD700", // 20
 ];
 
 // Background gradient presets per level
 const LEVEL_GRADIENTS = [
   "",
-  "from-slate-900 via-indigo-950 to-slate-900",
-  "from-slate-900 via-blue-950 to-slate-900",
-  "from-slate-900 via-violet-950 to-slate-900",
-  "from-slate-900 via-purple-950 to-slate-900",
-  "from-slate-900 via-fuchsia-950 to-slate-900",
-  "from-slate-900 via-rose-950 to-slate-900",
-  "from-slate-900 via-red-950 to-slate-900",
+  "from-slate-900 via-indigo-950 to-slate-900", // 1
+  "from-slate-900 via-blue-950 to-slate-900", // 2
+  "from-slate-900 via-violet-950 to-slate-900", // 3
+  "from-slate-900 via-purple-950 to-slate-900", // 4
+  "from-slate-900 via-fuchsia-950 to-slate-900", // 5
+  "from-slate-900 via-rose-950 to-slate-900", // 6
+  "from-slate-900 via-red-950 to-slate-900", // 7
+  "from-slate-900 via-orange-950 to-slate-900", // 8
+  "from-slate-900 via-amber-950 to-slate-900", // 9
+  "from-slate-900 via-yellow-950 to-slate-900", // 10
+  "from-slate-900 via-lime-950 to-slate-900", // 11
+  "from-slate-900 via-emerald-950 to-slate-900", // 12
+  "from-slate-900 via-teal-950 to-slate-900", // 13
+  "from-slate-900 via-cyan-950 to-slate-900", // 14
+  "from-slate-900 via-sky-950 to-slate-900", // 15
+  "from-slate-900 via-blue-950 to-slate-900", // 16
+  "from-slate-900 via-violet-950 to-slate-900", // 17
+  "from-slate-900 via-purple-950 to-slate-900", // 18
+  "from-slate-900 via-fuchsia-950 to-slate-900", // 19
+  "from-gray-900 via-yellow-900 to-gray-900", // 20
 ];
 
 // Animated score counter component
@@ -436,7 +793,7 @@ export default function MathRushGame({
         }
 
         // Level up check
-        if (newConsCorrect >= 3 && level < 7) {
+        if (newConsCorrect >= 3 && level < 20) {
           const newLevel = level + 1;
           setLevel(newLevel);
           setConsecutiveCorrect(0);
@@ -1073,6 +1430,31 @@ export default function MathRushGame({
           )}
         </AnimatePresence>
 
+        {/* Problem type indicator */}
+        {currentProblem.problemType && (
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentProblem.problemType}
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -10 }}
+              transition={{ duration: 0.3 }}
+              className="mb-2 text-center"
+            >
+              <span
+                className="inline-block rounded-full px-3 py-1 text-xs font-bold tracking-wide"
+                style={{
+                  background: `${DIFFICULTY_COLORS[level]}18`,
+                  color: DIFFICULTY_COLORS[level],
+                  border: `1px solid ${DIFFICULTY_COLORS[level]}30`,
+                }}
+              >
+                {currentProblem.problemType}
+              </span>
+            </motion.div>
+          </AnimatePresence>
+        )}
+
         {/* Problem */}
         <AnimatePresence mode="wait">
           <motion.div
@@ -1083,7 +1465,9 @@ export default function MathRushGame({
             transition={{ type: "spring", stiffness: 300, damping: 25 }}
             className="text-center"
           >
-            <div className="text-5xl font-black tabular-nums sm:text-6xl">
+            <div
+              className={`font-black tabular-nums ${currentProblem.expression.length > 20 ? "text-2xl sm:text-3xl" : currentProblem.expression.length > 14 ? "text-3xl sm:text-4xl" : "text-5xl sm:text-6xl"}`}
+            >
               {expressionParts.map((part, i) => {
                 const isOperator = /^\s[+\-×÷]\s$/.test(part);
                 if (isOperator) {
